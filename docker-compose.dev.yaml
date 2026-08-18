@@ -1,0 +1,62 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+    container_name: appshop_app
+    restart: "no"
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - .:/var/www/html/appshop
+
+    environment:
+      APP_ENV: dev
+      APP_SECRET: changeme
+
+      DATABASE_URL: "mysql://appshop:appshop@database:3306/appshop?serverVersion=8.4.0&charset=utf8mb4"
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: mysql:8.4
+
+    container_name: appshop_database
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: appshop
+      MYSQL_USER: appshop
+      MYSQL_PASSWORD: appshop
+      MYSQL_ROOT_PASSWORD: appshop
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - database_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "appshop",
+          "-pappshop"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  database_data:
