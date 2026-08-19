@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\ProductVariant;
 use App\Entity\Stock;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -27,6 +28,11 @@ class StockRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function findByVariant(ProductVariant $variant): ?Stock
+    {
+        return $this->findOneBy(['variant' => $variant]);
     }
 
     //    /**
