@@ -48,7 +48,7 @@ class StockService
                 'Stock insuffisant pour "%s" (demandé: %d, disponible: %d)',
                 $stock->getVariant()->getProduct()->getName(),
                 $qty,
-                $stock->getQty()                
+                $stock->getQty()
             ));
         }
 

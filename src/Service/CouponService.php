@@ -37,7 +37,17 @@ class CouponService
         }
 
         $minAmount = $coupon->getMinAmount();
-        if ($minAmount !== null && bccomp($this->cart->getTotal(), Money::assertNumericString($minAmount, 'montant minimum du coupon'), 2) < 0) {
+        if (
+            $minAmount !== null
+                && bccomp(
+                    $this->cart->getTotal(),
+                    Money::assertNumericString(
+                        $minAmount,
+                        'montant minimum du coupon'
+                    ),
+                    2
+                ) < 0
+        ) {
             throw new \InvalidArgumentException(sprintf('Montant minimum requis: %s€', $minAmount));
         }
 
