@@ -12,6 +12,7 @@ services:
 
     volumes:
       - .:/var/www/html/appshop
+      - vendor_data:/var/www/html/appshop/vendor
 
     environment:
       APP_ENV: dev
@@ -60,3 +61,4 @@ services:
 
 volumes:
   database_data:
+  vendor_data:
