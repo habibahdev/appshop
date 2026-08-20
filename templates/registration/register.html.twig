@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte{% endblock %}
+
+{% block body %}
+<div class="max-w-sm mx-auto px-6 py-24">
+
+    <h1 class="text-2xl font-medium text-stone-900 mb-10">Créer un compte</h1>
+
+    {{ form_start(registrationForm) }}
+        <div class="space-y-5">
+            <div>
+                {{ form_label(registrationForm.email, 'Email', {label_attr: {class: 'text-xs uppercase tracking-wide text-stone-400 mb-2 block'}}) }}
+                {{ form_widget(registrationForm.email, {attr: {class: 'w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]'}}) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div>
+                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {label_attr: {class: 'text-xs uppercase tracking-wide text-stone-400 mb-2 block'}}) }}
+                {{ form_widget(registrationForm.plainPassword, {attr: {class: 'w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]'}}) }}
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            <label class="flex items-start gap-2 text-sm text-stone-500 pt-2">
+                {{ form_widget(registrationForm.agreeTerms, {attr: {class: 'mt-0.5'}}) }}
+                J'accepte les conditions générales de vente
+            </label>
+            {{ form_errors(registrationForm.agreeTerms) }}
+
+            <button type="submit"
+                    class="w-full bg-stone-900 text-white py-3 text-sm tracking-wide hover:bg-[#1B4332] transition-colors mt-2">
+                Créer mon compte
+            </button>
+        </div>
+    {{ form_end(registrationForm) }}
+
+    <p class="text-sm text-stone-500 mt-8 text-center">
+        Déjà un compte ?
+        <a href="{{ path('app_login') }}" class="text-[#1B4332] hover:underline">Se connecter</a>
+    </p>
+</div>
+{% endblock %}
