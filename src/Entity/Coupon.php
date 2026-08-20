@@ -33,7 +33,7 @@ class Coupon
     private ?int $usageLimit = 0;
 
     #[ORM\Column]
-    private ?int $usageCount = null;
+    private ?int $usageCount = 0;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $expiresAt = null;
@@ -117,7 +117,7 @@ class Coupon
         return $this;
     }
 
-    public function getUsageCount(): ?int
+    public function getUsageCount(): int
     {
         return $this->usageCount;
     }

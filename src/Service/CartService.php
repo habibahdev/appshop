@@ -27,7 +27,7 @@ class CartService
             throw new \InvalidArgumentException('Variant introuvable');
         }
 
-        $stock = $this->stockRepository->findByVariant($variant);
+        $stock = $this->stockRepository->findOneByVariant($variant);
 
         $available = $stock?->getQty() ?? 0;
 
@@ -62,7 +62,7 @@ class CartService
 
         $variant = $this->variantRepository->find($variantId);
         if ($variant) {
-            $stock = $this->stockRepository->findByVariant($variant);
+            $stock = $this->stockRepository->findOneByVariant($variant);
             $qty = min($qty, $stock?->getQty() ?? 0);
         }
 

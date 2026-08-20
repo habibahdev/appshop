@@ -30,7 +30,7 @@ class PurchaseService
             if (!$stock || $stock->getQty() < $line['qty']) {
                 throw new \RuntimeException(
                     sprintf(
-                        'Stock inuffisant pour "%s"',
+                        'Stock insuffisant pour "%s"',
                         $line['variant']->getProduct()->getName()
                     )
                 );

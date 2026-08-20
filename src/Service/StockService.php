@@ -33,7 +33,7 @@ class StockService
 
     public function getStockForVariant(ProductVariant $variant): ?Stock
     {
-        return $this->stockRepository->findByVariant($variant);
+        return $this->stockRepository->findOneByVariant($variant);
     }
 
     public function restock(Stock $stock, int $qty, ?string $reason = null): void

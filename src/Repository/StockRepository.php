@@ -30,7 +30,7 @@ class StockRepository extends ServiceEntityRepository
         ;
     }
 
-    public function findByVariant(ProductVariant $variant): ?Stock
+    public function findOneByVariant(ProductVariant $variant): ?Stock
     {
         return $this->findOneBy(['variant' => $variant]);
     }
