@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto px-6 py-12">
+
+    <h1 class="text-2xl font-medium text-stone-900 mb-10 pb-6 border-b border-stone-200">Mon profil</h1>
+
+    <div class="mb-10">
+        <p class="text-xs uppercase tracking-wide text-stone-400 mb-2">Email</p>
+        <p class="text-sm text-stone-900">{{ app.user.email }}</p>
+    </div>
+
+    <div class="mb-10">
+        <p class="text-xs uppercase tracking-wide text-stone-400 mb-2">Téléphone</p>
+        <p class="text-sm text-stone-900">{{ app.user.phone ?: 'Non renseigné' }}</p>
+    </div>
+
+    <div class="divide-y divide-stone-200 border-t border-stone-200">
+        <a href="{{ path('app_profile_phone') }}" class="flex items-center justify-between py-4 hover:bg-stone-50 -mx-4 px-4 transition-colors">
+            <span class="text-sm text-stone-900">Modifier mon téléphone</span>
+            <span class="text-stone-400">&rarr;</span>
+        </a>
+        <a href="{{ path('app_profile_password') }}" class="flex items-center justify-between py-4 hover:bg-stone-50 -mx-4 px-4 transition-colors">
+            <span class="text-sm text-stone-900">Changer mon mot de passe</span>
+            <span class="text-stone-400">&rarr;</span>
+        </a>
+        <a href="{{ path('app_profile_address') }}" class="flex items-center justify-between py-4 hover:bg-stone-50 -mx-4 px-4 transition-colors">
+            <span class="text-sm text-stone-900">Mes adresses de livraison</span>
+            <span class="text-stone-400">&rarr;</span>
+        </a>
+        {#
+        <a href="{{ path('purchase_index') }}" class="flex items-center justify-between py-4 hover:bg-stone-50 -mx-4 px-4 transition-colors">
+            <span class="text-sm text-stone-900">Mes commandes</span>
+            <span class="text-stone-400">&rarr;</span>
+        </a>
+        #}
+    </div>
+</div>
+{% endblock %}

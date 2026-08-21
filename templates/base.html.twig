@@ -11,7 +11,66 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body class="h-full flex flex-col bg-[#FAFAF9] text-[#1C1C1A] antialiased">
+
+    <header class="border-b border-stone-200">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+
+            <a href="{{ path('app_home') }}" class="text-lg tracking-tight font-medium">
+                Boutique
+            </a>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm text-stone-600">
+                <a href="{{ path('app_catalog') }}" class="hover:text-[#1B4332]">Catalogue</a>
+            </nav>
+
+            <div class="flex items-center gap-6">
+                {% if app.user %}
+                    {#<a href="{{ path('order_index') }}" class="text-sm text-stone-600 hover:text-[#1B4332]">Mes commandes</a>#}
+                    <a href="{{ path('app_logout') }}" class="text-sm text-stone-600 hover:text-[#1B4332]">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="text-sm text-stone-600 hover:text-[#1B4332]">Connexion</a>
+                {% endif %}
+                {#
+                <a href="{{ path('app_cart') }}" class="relative text-stone-700 hover:text-[#1B4332]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.883-4.828 2.298-7.5H5.106M7.5 14.25L5.106 5.272M6 18.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18 18.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                    {% if cart_total_quantity() > 0 %}
+                    <span class="absolute -top-2 -right-2 bg-[#1B4332] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                        {{ cart_total_quantity() }}
+                    </span>
+                    {% endif %}
+                </a>
+                #}
+            </div>
+        </div>
+    </header>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+        <div class="max-w-6xl mx-auto px-6 pt-4">
+            <div class="text-sm px-4 py-3 border {{ label == 'danger' ? 'border-red-200 bg-red-50 text-red-700' : 'border-[#1B4332]/20 bg-[#1B4332]/5 text-[#1B4332]' }}">
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    {% endfor %}
+
+    <main class="flex-1">
         {% block body %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-stone-200 mt-20">
+        <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between gap-6 text-sm text-stone-500">
+            <p>&copy; {{ 'now'|date('Y') }} AppShop. Tous droits réservés.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-[#1B4332]">Conditions générales</a>
+                <a href="#" class="hover:text-[#1B4332]">Confidentialité</a>
+                <a href="#" class="hover:text-[#1B4332]">Contact</a>
+            </div>
+        </div>
+    </footer>
     </body>
 </html>

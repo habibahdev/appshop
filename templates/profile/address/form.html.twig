@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Adresse{% endblock %}
+
+{% block body %}
+<div class="max-w-sm mx-auto px-6 py-24">
+    <a href="{{ path('app_profile_addresses') }}" class="text-sm text-stone-500 hover:text-[#1B4332]">&larr; Mes adresses</a>
+
+    <h1 class="text-2xl font-medium text-stone-900 mt-6 mb-10">Adresse de livraison</h1>
+
+    {{ form_start(form) }}
+        <div class="space-y-5">
+            {% for field in ['label', 'fullName', 'street', 'postalCode', 'city', 'country'] %}
+            <div>
+                {{ form_label(form[field], null, {label_attr: {class: 'text-xs uppercase tracking-wide text-stone-400 mb-2 block'}}) }}
+                {{ form_widget(form[field], {attr: {class: 'w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]'}}) }}
+                {{ form_errors(form[field]) }}
+            </div>
+            {% endfor %}
+
+            <label class="flex items-center gap-2 text-sm text-stone-500">
+                {{ form_widget(form.isDefault) }}
+                {{ form_label(form.isDefault, null, {label_attr: {class: ''}}) }}
+            </label>
+
+            <button type="submit"
+                    class="w-full bg-stone-900 text-white py-3 text-sm tracking-wide hover:bg-[#1B4332] transition-colors mt-2">
+                Enregistrer
+            </button>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes adresses{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto px-6 py-12">
+    <a href="{{ path('app_profile') }}" class="text-sm text-stone-500 hover:text-[#1B4332]">&larr; Profil</a>
+
+    <div class="flex items-center justify-between mt-6 mb-10 pb-6 border-b border-stone-200">
+        <h1 class="text-2xl font-medium text-stone-900">Mes adresses</h1>
+        <a href="{{ path('app_profile_address_add') }}" class="text-sm text-[#1B4332] hover:underline">+ Ajouter</a>
+    </div>
+
+    {% if addresses is empty %}
+        <p class="text-sm text-stone-500">Aucune adresse enregistrée.</p>
+    {% else %}
+    <div class="divide-y divide-stone-200">
+        {% for address in addresses %}
+        <div class="py-5">
+            <div class="flex items-center gap-2 mb-2">
+                <p class="text-sm text-stone-900">{{ address.label }}</p>
+                {% if address.isDefault %}
+                <span class="text-[10px] uppercase tracking-wide text-[#1B4332] border border-[#1B4332]/30 px-1.5 py-0.5">Par défaut</span>
+                {% endif %}
+            </div>
+            <p class="text-sm text-stone-500">{{ address.fullName }}</p>
+            <p class="text-sm text-stone-500">{{ address.street }}, {{ address.postalCode }} {{ address.city }}, {{ address.country }}</p>
+
+            <div class="flex gap-4 mt-3">
+                <a href="{{ path('app_profile_address_edit', { id: address.id }) }}" class="text-xs text-[#1B4332] hover:underline">Modifier</a>
+                <form action="{{ path('app_profile_address_delete', { id: address.id }) }}" method="post" onsubmit="return confirm('Supprimer cette adresse ?')">
+                    <button type="submit" class="text-xs text-stone-400 hover:text-red-600">Supprimer</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
