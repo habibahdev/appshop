@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+
+<div class="border-b border-stone-200">
+    <div class="max-w-6xl mx-auto px-6 py-24 md:py-32">
+        <p class="text-xs uppercase tracking-widest text-stone-400 mb-4">Nouvelle collection</p>
+        <h1 class="text-4xl md:text-5xl font-medium text-stone-900 max-w-xl leading-tight">
+            Des pièces pensées pour durer, pas pour la saison.
+        </h1>
+        <p class="text-stone-500 mt-6 max-w-md">
+            Matières choisies, coupes simples, fabrication soignée. Rien de superflu.
+        </p>
+        <a href="{{ path('app_catalog') }}"
+           class="inline-block mt-8 bg-stone-900 text-white px-8 py-3 text-sm tracking-wide hover:bg-[#1B4332] transition-colors">
+            Voir le catalogue
+        </a>
+    </div>
+</div>
+
+{% if categories is not empty %}
+<div class="max-w-6xl mx-auto px-6 py-16">
+    <h2 class="text-sm uppercase tracking-wide text-stone-400 mb-8">Catégories</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
+        {% for category in categories %}
+        <a href="{{ path('app_catalog', { categorie: category.id }) }}"
+           class="bg-[#FAFAF9] p-8 flex items-center justify-center text-center hover:bg-white transition-colors group">
+            <span class="text-sm text-stone-700 group-hover:text-[#1B4332]">{{ category.name }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if newProducts is not empty %}
+<div class="max-w-6xl mx-auto px-6 py-16">
+    <div class="flex items-end justify-between mb-8">
+        <h2 class="text-sm uppercase tracking-wide text-stone-400">Nouveautés</h2>
+        <a href="{{ path('app_catalog') }}" class="text-sm text-[#1B4332] hover:underline">Voir tout &rarr;</a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+        {% for product in newProducts|slice(0, 4) %}
+        <a href="{{ path('app_product_show', {slug: product.slug}) }}" class="group block">
+            <div class="aspect-[4/5] bg-stone-100 mb-3 overflow-hidden">
+                {#{% if product.images.first %}
+                <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
+                     alt="{{ product.name }}"
+                     class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300">
+                {% endif %}#}
+            </div>
+            <h3 class="text-sm text-stone-900">{{ product.name }}</h3>
+            <p class="text-sm text-stone-500 mt-1">
+                {% if product.minPrice %}
+                    À partir de {{ product.minPrice|number_format(2, ',', ' ') }} €
+                {% endif %}
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
