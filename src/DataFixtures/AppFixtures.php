@@ -139,6 +139,126 @@ class AppFixtures extends Fixture
                 'price' => '19.90',
                 'description' => 'Broderie fine, ajustable.'
             ],
+            [
+                'name' => 'T-shirt Essentiel',
+                'category' => 'T-shirts',
+                'price' => '24.90',
+                'description' => 'Coton bio, coupe droite.'
+            ],
+            [
+                'name' => 'T-shirt Col Rond',
+                'category' => 'T-shirts',
+                'price' => '22.90',
+                'description' => 'Basique intemporel.'
+            ],
+            [
+                'name' => 'T-shirt Rayé',
+                'category' => 'T-shirts',
+                'price' => '26.90',
+                'description' => 'Rayures marinière, coton épais.'
+            ],
+            [
+                'name' => 'T-shirt Oversize',
+                'category' => 'T-shirts',
+                'price' => '28.90',
+                'description' => 'Coupe ample, tissu lourd.'
+            ],
+            [
+                'name' => 'T-shirt Manches Longues',
+                'category' => 'T-shirts',
+                'price' => '32.90',
+                'description' => 'Parfait pour les saisons fraîches.'
+            ],
+            [
+                'name' => 'T-shirt Col V',
+                'category' => 'T-shirts',
+                'price' => '23.90',
+                'description' => 'Coupe ajustée, col en V.'
+            ],
+            [
+                'name' => 'Veste Légère',
+                'category' => 'Vestes',
+                'price' => '89.00',
+                'description' => 'Coupe-vent déperlant.'
+            ],
+            [
+                'name' => 'Veste en Jean',
+                'category' => 'Vestes',
+                'price' => '79.00',
+                'description' => 'Denim brut, coupe classique.'
+            ],
+            [
+                'name' => 'Veste Matelassée',
+                'category' => 'Vestes',
+                'price' => '99.00',
+                'description' => 'Chaude et légère, doublure polaire.'
+            ],
+            [
+                'name' => 'Blouson Bomber',
+                'category' => 'Vestes',
+                'price' => '95.00',
+                'description' => 'Style aviateur, finitions côtelées.'
+            ],
+            [
+                'name' => 'Parka Imperméable',
+                'category' => 'Vestes',
+                'price' => '129.00',
+                'description' => 'Capuche amovible, tissu déperlant.'
+            ],
+            [
+                'name' => 'Veste Sans Manches',
+                'category' => 'Vestes',
+                'price' => '69.00',
+                'description' => 'Doudoune sans manches, très légère.'
+            ],
+            [
+                'name' => 'Casquette Brodée',
+                'category' => 'Accessoires',
+                'price' => '19.90',
+                'description' => 'Broderie fine, ajustable.'
+            ],
+            [
+                'name' => 'Bonnet en Laine',
+                'category' => 'Accessoires',
+                'price' => '15.90',
+                'description' => 'Laine mérinos, tricot serré.'
+            ],
+            [
+                'name' => 'Écharpe Oversize',
+                'category' => 'Accessoires',
+                'price' => '24.90',
+                'description' => 'Grand format, très douce.'
+            ],
+            [
+                'name' => 'Ceinture en Cuir',
+                'category' => 'Accessoires',
+                'price' => '34.90',
+                'description' => 'Cuir pleine fleur, boucle métal.'
+            ],
+            [
+                'name' => 'Sac Bandoulière',
+                'category' => 'Accessoires',
+                'price' => '49.90',
+                'description' => 'Format compact, plusieurs poches.'
+            ],
+            [
+                'name' => 'Chaussettes (lot de 3)',
+                'category' => 'Accessoires',
+                'price' => '12.90',
+                'description' => 'Coton peigné, tailles mixtes.'
+            ],
+            [
+                'name' => 'Gants Tactiles',
+                'category' => 'Accessoires',
+                'price' => '18.90',
+                'description' => 'Compatibles écrans tactiles.'
+            ],
+            [
+                'name' => 'Portefeuille Slim',
+                'category' => 'Accessoires',
+                'price' => '29.90',
+                'description' => 'Format carte, cuir souple.'
+            ],
         ];
 
         $products = [];
