@@ -2,14 +2,21 @@
 
 namespace App\DataFixtures;
 
+use App\Util\Money;
 use App\Entity\User;
 use App\Entity\Stock;
 use App\Entity\Coupon;
+use App\Entity\Detail;
 use App\Entity\Review;
+use App\Entity\Address;
+use App\Entity\Invoice;
 use App\Entity\Product;
 use App\Entity\Category;
+use App\Entity\Purchase;
 use App\Enum\CouponType;
 use App\Enum\ReviewStatus;
+use App\Enum\PurchaseStatus;
+use App\Service\StockService;
 use App\Entity\ProductVariant;
 use App\Entity\ProductAttribute;
 use App\Entity\ProductAttributeValue;
@@ -19,19 +26,25 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
-    public function __construct(private UserPasswordHasherInterface $hasher)
-    {
+    public function __construct(
+        private UserPasswordHasherInterface $hasher,
+        private StockService $stockService
+    ) {
     }
 
     public function load(ObjectManager $manager): void
     {
         $users = $this->loadUsers($manager);
+        $this->loadAddresses($manager, $users);
         $categories = $this->loadCategories($manager);
         $attributes = $this->loadAttributes($manager);
-        $products = $this->loadProducts($manager, $categories, $attributes);
+        [$products, $variantsByProduct] = $this->loadProducts($manager, $categories, $attributes);
         $this->loadCoupons($manager);
-        $this->loadReviews($manager, $products, $users);
 
+        $manager->flush();
+
+        $purchasedProductIds = $this->loadPurchases($manager, $users, $variantsByProduct);
+        $this->loadReviews($manager, $products, $users, $purchasedProductIds);
         $manager->flush();
     }
 
@@ -42,12 +55,18 @@ class AppFixtures extends Fixture
     {
         $admin = new User();
         $admin->setEmail('admin@appshop.test');
+        $admin->setFirstname('Admin');
+        $admin->setLastname('Admin');
         $admin->setRoles(['ROLE_ADMIN']);
+        $admin->setPhone('+33612345678');
         $admin->setPassword($this->hasher->hashPassword($admin, 'password'));
         $manager->persist($admin);
 
         $customer = new User();
         $customer->setEmail('client@appshop.test');
+        $customer->setFirstname('Jean');
+        $customer->setLastname('Jacques');
+        $customer->setPhone('+33698765432');
         $customer->setRoles(['ROLE_USER']);
         $customer->setPassword($this->hasher->hashPassword($customer, 'password'));
         $manager->persist($customer);
@@ -60,7 +79,7 @@ class AppFixtures extends Fixture
      */
     private function loadCategories(ObjectManager $manager): array
     {
-        $names = ['T-shirts', 'Vestes', 'Accessoires'];
+        $names = ['T-shirts', 'Vestes', 'Manteaux', 'Jeans', 'Pantalons', 'Chaussures', 'Sacs', 'Accessoires'];
         $categories = [];
 
         foreach ($names as $name) {
@@ -88,7 +107,7 @@ class AppFixtures extends Fixture
         $manager->persist($taille);
 
         $values = [];
-        foreach (['Noir', 'Blanc', 'Bleu'] as $v) {
+        foreach (['Noir', 'Blanc', 'Bleu', 'Orange'] as $v) {
             $value = new ProductAttributeValue();
             $value->setAttribute($couleur);
             $value->setValue($v);
@@ -110,35 +129,11 @@ class AppFixtures extends Fixture
     /**
      * @param array<string, Category> $categories
      * @param array<string, ProductAttributeValue> $attributeValues
-     * @return array<int, Product>
+     * @return array{0: array<int, Product>, 1: array<int, ProductVariant[]>}
      */
     private function loadProducts(ObjectManager $manager, array $categories, array $attributeValues): array
     {
         $catalogue = [
-            [
-                'name' => 'T-shirt Essentiel',
-                'category' => 'T-shirts',
-                'price' => '24.90',
-                'description' => 'Coton bio, coupe droite.'
-            ],
-            [
-                'name' => 'T-shirt Col Rond',
-                'category' => 'T-shirts',
-                'price' => '22.90',
-                'description' => 'Basique intemporel.'
-            ],
-            [
-                'name' => 'Veste Légère',
-                'category' => 'Vestes',
-                'price' => '89.00',
-                'description' => 'Coupe-vent déperlant.'
-            ],
-            [
-                'name' => 'Casquette Brodée',
-                'category' => 'Accessoires',
-                'price' => '19.90',
-                'description' => 'Broderie fine, ajustable.'
-            ],
             [
                 'name' => 'T-shirt Essentiel',
                 'category' => 'T-shirts',
@@ -200,16 +195,118 @@ class AppFixtures extends Fixture
                 'description' => 'Style aviateur, finitions côtelées.'
             ],
             [
-                'name' => 'Parka Imperméable',
-                'category' => 'Vestes',
-                'price' => '129.00',
-                'description' => 'Capuche amovible, tissu déperlant.'
-            ],
-            [
                 'name' => 'Veste Sans Manches',
                 'category' => 'Vestes',
                 'price' => '69.00',
                 'description' => 'Doudoune sans manches, très légère.'
+            ],
+            [
+                'name' => 'Manteau en Laine',
+                'category' => 'Manteaux',
+                'price' => '159.00',
+                'description' => 'Laine mélangée, coupe droite.'
+            ],
+            [
+                'name' => 'Trench Classique',
+                'category' => 'Manteaux',
+                'price' => '179.00',
+                'description' => 'Coton ciré, ceinture ajustable.'
+            ],
+            [
+                'name' => 'Parka Imperméable',
+                'category' => 'Manteaux',
+                'price' => '129.00',
+                'description' => 'Capuche amovible, tissu déperlant.'
+            ],
+            [
+                'name' => 'Manteau Long Oversize',
+                'category' => 'Manteaux',
+                'price' => '169.00',
+                'description' => 'Coupe ample, tissu épais.'
+            ],
+            [
+                'name' => 'Jean Slim',
+                'category' => 'Jeans',
+                'price' => '59.90',
+                'description' => 'Coupe ajustée, stretch confortable.'
+            ],
+            [
+                'name' => 'Jean Droit',
+                'category' => 'Jeans',
+                'price' => '54.90',
+                'description' => 'Coupe intemporelle, denim brut.'
+            ],
+            [
+                'name' => 'Jean Mom',
+                'category' => 'Jeans',
+                'price' => '64.90',
+                'description' => 'Taille haute, coupe rétro.'
+            ],
+            [
+                'name' => 'Jean Skinny',
+                'category' => 'Jeans',
+                'price' => '57.90',
+                'description' => 'Coupe près du corps, très extensible.'
+            ],
+            [
+                'name' => 'Pantalon Chino',
+                'category' => 'Pantalons',
+                'price' => '49.90',
+                'description' => 'Coton stretch, coupe droite.'
+            ],
+            [
+                'name' => 'Pantalon de Costume',
+                'category' => 'Pantalons',
+                'price' => '69.90',
+                'description' => 'Coupe cintrée, tissu structuré.'
+            ],
+            [
+                'name' => 'Jogger Cargo',
+                'category' => 'Pantalons',
+                'price' => '44.90',
+                'description' => 'Poches multiples, taille élastique.'
+            ],
+            [
+                'name' => 'Sneakers Basses',
+                'category' => 'Chaussures',
+                'price' => '79.00',
+                'description' => 'Cuir et toile, semelle souple.'
+            ],
+            [
+                'name' => 'Bottines en Cuir',
+                'category' => 'Chaussures',
+                'price' => '119.00',
+                'description' => 'Cuir pleine fleur, semelle gomme.'
+            ],
+            [
+                'name' => 'Mocassins',
+                'category' => 'Chaussures',
+                'price' => '89.00',
+                'description' => 'Cuir souple, doublure cuir.'
+            ],
+            [
+                'name' => 'Baskets Running',
+                'category' => 'Chaussures',
+                'price' => '95.00',
+                'description' => 'Amorti renforcé, mesh respirant.'
+            ],
+            [
+                'name' => 'Sac Bandoulière',
+                'category' => 'Sacs',
+                'price' => '49.90',
+                'description' => 'Format compact, plusieurs poches.'
+            ],
+            [
+                'name' => 'Sac à Dos Urbain',
+                'category' => 'Sacs',
+                'price' => '69.90',
+                'description' => 'Compartiment ordinateur, tissu résistant.'
+            ],
+            [
+                'name' => 'Cabas en Toile',
+                'category' => 'Sacs',
+                'price' => '34.90',
+                'description' => 'Grand format, anses renforcées.'
             ],
             [
                 'name' => 'Casquette Brodée',
@@ -236,12 +333,6 @@ class AppFixtures extends Fixture
                 'description' => 'Cuir pleine fleur, boucle métal.'
             ],
             [
-                'name' => 'Sac Bandoulière',
-                'category' => 'Accessoires',
-                'price' => '49.90',
-                'description' => 'Format compact, plusieurs poches.'
-            ],
-            [
                 'name' => 'Chaussettes (lot de 3)',
                 'category' => 'Accessoires',
                 'price' => '12.90',
@@ -262,6 +353,7 @@ class AppFixtures extends Fixture
         ];
 
         $products = [];
+        $variantsByProduct = [];
 
         foreach ($catalogue as $i => $data) {
             $product = new Product();
@@ -271,8 +363,9 @@ class AppFixtures extends Fixture
             $product->setCategory($categories[$data['category']]);
             $manager->persist($product);
 
-            $colors = ['Noir', 'Blanc', 'Bleu'];
+            $colors = ['Noir', 'Blanc', 'Bleu', 'Orange'];
             $sizes = ['S', 'M', 'L', 'XL'];
+            $variants = [];
 
             foreach ($colors as $color) {
                 foreach ($sizes as $size) {
@@ -288,16 +381,99 @@ class AppFixtures extends Fixture
                     // pas un mouvement à tracer dans l'historique.
                     $stock = new Stock();
                     $stock->setVariant($variant);
-                    $stock->setQty(random_int(0, 30));
+                    $stock->setQty(random_int(10, 30));
                     $stock->setAlertThreshold(5);
                     $manager->persist($stock);
+
+                    $variants[] = $variant;
                 }
             }
 
             $products[] = $product;
+            $variantsByProduct[spl_object_id($product)] = $variants;
         }
 
-        return $products;
+        return [$products, $variantsByProduct];
+    }
+
+    /**
+     * @param array<string, User> $users
+     * @param array<int, ProductVariant[]> $variantsByProduct
+     * @return int[] ids des Product effectivement achetés par le client (pour loadReviews)
+     */
+    private function loadPurchases(ObjectManager $manager, array $users, array $variantsByProduct): array
+    {
+        $customer = $users['customer'];
+        $purchasedProductIds = [];
+
+        $scenarios = [
+            ['status' => PurchaseStatus::DELIVERED, 'withInvoice' => true],
+            ['status' => PurchaseStatus::PREPARATION, 'withInvoice' => true],
+            ['status' => PurchaseStatus::PENDING, 'withInvoice' => false],
+            ['status' => PurchaseStatus::PREPARATION, 'withInvoice' => true],
+            ['status' => PurchaseStatus::PENDING, 'withInvoice' => false],
+        ];
+
+        $allVariants = array_merge(...array_values($variantsByProduct));
+
+        foreach ($scenarios as $i => $scenario) {
+            $purchase = new Purchase();
+            $purchase->setUser($customer);
+            $purchase->setReference($this->generateReference($i));
+            $purchase->setDelivery("Jean Jacques\n12 rue des Lilas\n75011 Paris\nFrance");
+            $purchase->setStatus($scenario['status']);
+
+            $lineCount = random_int(1, 3);
+            $chosen = (array) array_rand($allVariants, min($lineCount, count($allVariants)));
+
+            $total = '0.00';
+
+            foreach ($chosen as $index) {
+                $variant = $allVariants[$index];
+                $qty = random_int(1, 2);
+
+                $detail = new Detail();
+                $detail->setVariant($variant);
+                $detail->setProductName($variant->getProduct()->getName());
+                $detail->setVariantLabel($variant->getLabel());
+                $detail->setProductPrice($variant->getPrice());
+                $detail->setQty($qty);
+                $purchase->addDetail($detail);
+
+                $price = Money::assertNumericString(
+                    $variant->getPrice(),
+                    'prix de la variante'
+                );
+
+
+                $total = bcadd($total, bcmul($price, (string) $qty, 2), 2);
+                $purchasedProductIds[] = $variant->getProduct()->getId();
+            }
+
+            $purchase->setTotal($total);
+            $purchase->setDiscount('0.00');
+            $manager->persist($purchase);
+            $manager->flush();
+
+            if ($scenario['status'] !== PurchaseStatus::PENDING) {
+                foreach ($purchase->getDetails() as $detail) {
+                    $stock = $this->stockService->getStockForVariant($detail->getVariant());
+                    if ($stock && $stock->getQty() >= $detail->getQty()) {
+                        $this->stockService->reserveForSale($stock, $detail->getQty(), $purchase);
+                    }
+                }
+            }
+
+            if ($scenario['withInvoice']) {
+                $invoice = new Invoice();
+                $invoice->setNumber('FAC-2026-' . str_pad((string) $purchase->getId(), 6, '0', STR_PAD_LEFT));
+                $invoice->setFilename($invoice->getNumber() . '.pdf');
+                $purchase->setInvoice($invoice);
+                $manager->persist($invoice);
+            }
+        }
+
+        return array_unique($purchasedProductIds);
     }
 
     private function loadCoupons(ObjectManager $manager): void
@@ -320,9 +496,14 @@ class AppFixtures extends Fixture
     /**
      * @param array<int, Product> $products
      * @param array<string, User> $users
+     * @param int[] $purchasedProductIds
      */
-    private function loadReviews(ObjectManager $manager, array $products, array $users): void
-    {
+    private function loadReviews(
+        ObjectManager $manager,
+        array $products,
+        array $users,
+        array $purchasedProductIds
+    ): void {
         $comments = [
             'Très satisfait, coupe parfaite.',
             'Bonne qualité pour le prix.',
@@ -341,10 +522,45 @@ class AppFixtures extends Fixture
         }
     }
 
+    /**
+     * @param array<string, User> $users
+     */
+    private function loadAddresses(ObjectManager $manager, array $users): void
+    {
+        $customer = $users['customer'];
+
+        $home = new Address();
+        $home->setUser($customer);
+        $home->setLabel('Maison');
+        $home->setFullName('Jean Jacques');
+        $home->setStreet('12 rue des Lilas');
+        $home->setPostalCode('75011');
+        $home->setCity('Paris');
+        $home->setCountry('France');
+        $home->setIsDefault(true);
+        $manager->persist($home);
+
+        $work = new Address();
+        $work->setUser($customer);
+        $work->setLabel('Travail');
+        $work->setFullName('Jean Jacques');
+        $work->setStreet('8 avenue Victor Hugo');
+        $work->setPostalCode('69011');
+        $work->setCity('Lyon');
+        $work->setCountry('France');
+        $work->setIsDefault(false);
+        $manager->persist($work);
+    }
+
     private function slugify(string $text): string
     {
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $text), '-'));
 
         return $slug . '-' . substr(md5(uniqid('', true)), 0, 6);
+    }
+
+    private function generateReference(int $index): string
+    {
+        return 'CMD-2026-' . str_pad((string) ($index + 1), 6, '0', STR_PAD_LEFT);
     }
 }

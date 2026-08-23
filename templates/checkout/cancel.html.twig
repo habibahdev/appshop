@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement annulé{% endblock %}
+
+{% block body %}
+<div class="max-w-lg mx-auto px-6 py-24 text-center">
+    <p class="text-xs uppercase tracking-widest text-stone-400 mb-4">Paiement annulé</p>
+    <h1 class="text-2xl font-medium text-stone-900 mb-4">Ta commande n'a pas été finalisée</h1>
+    <p class="text-sm text-stone-500 mb-10">Aucun montant n'a été débité. Tu peux reprendre ta commande depuis le panier.</p>
+    <a href="{{ path('app_cart') }}"
+       class="inline-block bg-stone-900 text-white px-8 py-3 text-sm tracking-wide hover:bg-[#1B4332] transition-colors">
+        Retour au panier
+    </a>
+</div>
+{% endblock %}

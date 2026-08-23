@@ -53,6 +53,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $addresses;
 
+    #[ORM\Column(length: 255)]
+    private ?string $lastname = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $firstname = null;
+
     public function __construct()
     {
         $this->purchases = new ArrayCollection();
@@ -224,6 +230,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $address->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): static
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(string $firstname): static
+    {
+        $this->firstname = $firstname;
 
         return $this;
     }

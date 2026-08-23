@@ -20,9 +20,9 @@ class AddressFormType extends AbstractType
                 'label' => 'Nom de l\'adresse',
                 'attr' => [
                     'placeholder' => 'Maison, Travail, ...',
-                    'constraints' => [
-                        new NotBlank()
-                    ]
+                ],
+                'constraints' => [
+                    new NotBlank()
                 ]
             ])
             ->add('fullName', TextType::class, [

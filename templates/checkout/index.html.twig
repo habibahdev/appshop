@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Valider ma commande{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto px-6 py-12">
+
+    <h1 class="text-2xl font-medium text-stone-900 mb-10 pb-6 border-b border-stone-200">Valider ma commande</h1>
+
+    <form action="{{ path('app_checkout') }}" method="post" class="space-y-6">
+
+        {% if addresses is not empty %}
+        <div>
+            <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">Adresse de livraison</p>
+
+            <div class="space-y-2">
+                {% for saved in addresses %}
+                <label class="block cursor-pointer">
+                    <input type="radio" name="address_choice" value="{{ saved.id }}"
+                           data-delivery="{{ saved.toDeliveryString }}"
+                           class="peer sr-only address-radio"
+                           {{ loop.first ? 'checked' }}>
+                    <div class="border border-stone-200 px-4 py-3 peer-checked:border-[#1B4332] hover:border-stone-400 transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-stone-900">{{ saved.label }}</span>
+                            {% if saved.isDefault %}
+                            <span class="text-[10px] uppercase tracking-wide text-[#1B4332] border border-[#1B4332]/30 px-1.5 py-0.5">Par défaut</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-xs text-stone-500 mt-1">{{ saved.street }}, {{ saved.postalCode }} {{ saved.city }}</p>
+                    </div>
+                </label>
+                {% endfor %}
+
+                <label class="block cursor-pointer">
+                    <input type="radio" name="address_choice" value="new" class="peer sr-only address-radio">
+                    <div class="border border-stone-200 px-4 py-3 peer-checked:border-[#1B4332] hover:border-stone-400 transition-colors">
+                        <span class="text-sm text-stone-900">Utiliser une autre adresse</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+        {% endif %}
+
+        <div id="address-textarea-wrapper" class="{{ addresses is not empty ? 'hidden' : '' }}">
+            <label for="address" class="text-xs uppercase tracking-wide text-stone-400 mb-2 block">
+                Adresse de livraison
+            </label>
+            <textarea id="address" name="address" rows="3" {{ addresses is empty ? 'required' }}
+                      placeholder="Nom, numéro, rue, code postal, ville"
+                      class="w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]"></textarea>
+        </div>
+
+        <div class="pt-4 border-t border-stone-200">
+            <p class="text-sm text-stone-500 mb-1">Tu seras redirigé vers Stripe pour le paiement sécurisé.</p>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-stone-900 text-white py-3.5 text-sm tracking-wide hover:bg-[#1B4332] transition-colors">
+            Continuer vers le paiement
+        </button>
+    </form>
+</div>
+
+{% if addresses is not empty %}
+<script>
+const wrapper = document.getElementById('address-textarea-wrapper');
+const textarea = document.getElementById('address');
+const radios = document.querySelectorAll('.address-radio');
+
+function syncAddressField() {
+    const checked = document.querySelector('.address-radio:checked');
+    if (!checked) return;
+
+    if (checked.value === 'new') {
+        wrapper.classList.remove('hidden');
+        textarea.value = '';
+        textarea.required = true;
+    } else {
+        wrapper.classList.add('hidden');
+        textarea.value = checked.dataset.delivery;
+        textarea.required = false;
+    }
+}
+
+radios.forEach(radio => radio.addEventListener('change', syncAddressField));
+syncAddressField(); // état initial au chargement
+</script>
+{% endif %}
+{% endblock %}

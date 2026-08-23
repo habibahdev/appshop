@@ -30,7 +30,7 @@ final class PasswordController extends AbstractController
             $curPassword = $form->get('currentPassword')->getData();
 
             if (!$hasher->isPasswordValid($user, $curPassword)) {
-                $this->addFlash('danger', 'Le mot de passe actuel est incorrect');
+                $this->addFlash('error', 'Le mot de passe actuel est incorrect');
 
                 return $this->render('profile/password/index.html.twig', [
                     'form' => $form

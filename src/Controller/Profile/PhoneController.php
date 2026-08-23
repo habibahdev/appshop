@@ -26,7 +26,7 @@ final class PhoneController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash(
-                'info',
+                'success',
                 'Numéro de téléphone mis à jour'
             );
 

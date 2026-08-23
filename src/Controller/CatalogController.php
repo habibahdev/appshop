@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
+use App\Repository\StockRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,15 +38,21 @@ final class CatalogController extends AbstractController
     }
 
     #[Route('/product/{slug}', name: 'app_product_show')]
-    public function show(string $slug, ProductRepository $productRepository): Response
+    public function show(string $slug, ProductRepository $productRepository, StockRepository $stockRepository): Response
     {
         $product = $productRepository->findOneBy([
             'slug' => $slug,
             'isActive' => true
         ]) ?? throw $this->createNotFoundException();
 
+        $stocks = [];
+        foreach ($product->getVariants() as $variant) {
+            $stocks[$variant->getId()] = $stockRepository->findOneByVariant($variant);
+        }
+
         return $this->render('catalog/show.html.twig', [
-            'product' => $product
+            'product' => $product,
+            'stocks' => $stocks
         ]);
     }
 }
