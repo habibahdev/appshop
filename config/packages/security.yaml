@@ -22,6 +22,13 @@ security:
             form_login:
                 login_path: app_login
                 check_path: app_login
+            logout:
+                path: app_logout
+                target: app_home
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 week in seconds
+                always_remember_me: false
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall

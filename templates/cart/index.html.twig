@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panier{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto px-6 py-12">
+
+    <h1 class="text-2xl font-medium text-stone-900 mb-10 pb-6 border-b border-stone-200">Panier</h1>
+
+    {% if items is empty %}
+        <p class="text-stone-500 text-sm mb-6">Ton panier est vide.</p>
+        <a href="{{ path('app_catalog') }}" class="text-sm text-[#1B4332] hover:underline">Voir le catalogue &rarr;</a>
+    {% else %}
+
+    <div class="divide-y divide-stone-200">
+        {% for item in items %}
+        <div class="flex items-center gap-6 py-6">
+            <div class="w-20 h-24 bg-stone-100 shrink-0 overflow-hidden">
+                {% if item.variant.product.images.first %}
+                <img src="{{ asset('uploads/products/' ~ item.variant.product.images.first.filename) }}"
+                     class="w-full h-full object-cover">
+                {% endif %}
+            </div>
+
+            <div class="flex-1">
+                <p class="text-sm text-stone-900">{{ item.variant.product.name }}</p>
+                <p class="text-xs text-stone-500 mt-1">{{ item.variant.label }}</p>
+                <p class="text-xs text-stone-400 mt-1">{{ item.variant.price|number_format(2, ',', ' ') }} € / unité</p>
+            </div>
+
+            <form action="{{ path('app_cart_update', {variantId: item.variant.id}) }}" method="post">
+                <input
+    type="number"
+    name="qty"
+    value="{{ item.qty }}"
+    min="1"
+    max="{{ stocks[item.variant.id] }}"
+    onchange="this.form.submit()"
+    class="w-16 text-sm border border-stone-200 px-2 py-1 text-center focus:outline-none focus:border-[#1B4332]"
+>
+            </form>
+
+            <p class="text-sm text-stone-900 w-20 text-right">{{ item.subtotal|number_format(2, ',', ' ') }} €</p>
+
+            <form action="{{ path('app_cart_remove', { variantId: item.variant.id }) }}" method="post">
+                <button type="submit" class="text-stone-400 hover:text-red-600 text-sm">&times;</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% set appliedCoupon = coupon_applied() %}
+    {% set discount = appliedCoupon ? coupon_discount(total) : '0.00' %}
+
+    <div class="pt-6 mt-4 border-t border-stone-200">
+        {% if appliedCoupon %}
+            <div class="flex justify-between items-center text-sm mb-2">
+                <span class="text-stone-500">Code <span class="text-stone-900">{{ appliedCoupon.code }}</span></span>
+                <form action="{{ path('app_coupon_remove') }}" method="post">
+                    <button type="submit" class="text-stone-400 hover:text-red-600">Retirer</button>
+                </form>
+            </div>
+            <div class="flex justify-between text-sm text-[#1B4332] mb-4">
+                <span>Réduction</span>
+                <span>&minus;{{ discount|number_format(2, ',', ' ') }} €</span>
+            </div>
+        {% else %}
+            <form action="{{ path('app_coupon_apply') }}" method="post" class="flex gap-2 mb-6">
+                <input type="text" name="code" placeholder="Code promo"
+                       class="flex-1 text-sm border border-stone-200 px-3 py-2 focus:outline-none focus:border-[#1B4332] uppercase">
+                <button type="submit" class="text-sm border border-stone-900 px-4 hover:bg-stone-900 hover:text-white transition-colors">
+                    Appliquer
+                </button>
+            </form>
+        {% endif %}
+
+        <div class="flex justify-between items-center">
+            <span class="text-sm text-stone-500">Total</span>
+            <span class="text-xl text-stone-900">{{ (total|number_format(2, '.', '') - discount)|number_format(2, ',', ' ') }} €</span>
+        </div>
+    </div>
+
+    <div class="mt-8 flex justify-end">
+        <a href="{{ path('app_checkout') }}"
+           class="bg-[#1B4332] text-white px-8 py-3 text-sm tracking-wide hover:bg-[#143526] transition-colors">
+            Passer commande
+        </a>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

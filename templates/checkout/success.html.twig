@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande confirmée{% endblock %}
+
+{% block body %}
+<div class="max-w-lg mx-auto px-6 py-24 text-center">
+    <p class="text-xs uppercase tracking-widest text-[#1B4332] mb-4">Commande confirmée</p>
+    <h1 class="text-2xl font-medium text-stone-900 mb-4">Merci pour ta commande</h1>
+    <p class="text-sm text-stone-500 mb-10">
+        Référence <span class="text-stone-900">{{ purchase.reference }}</span> — un email de confirmation te sera envoyé
+        dès que le paiement sera validé.
+    </p>
+    <a href="{{ path('app_purchase_show', {reference: purchase.reference}) }}"
+       class="inline-block bg-stone-900 text-white px-8 py-3 text-sm tracking-wide hover:bg-[#1B4332] transition-colors">
+        Suivre ma commande
+    </a>
+</div>
+{% endblock %}

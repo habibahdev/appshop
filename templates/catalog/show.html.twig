@@ -46,7 +46,7 @@
                         <label class="cursor-pointer">
                             <input type="radio" name="variant" value="{{ variant.id }}"
                                    data-price="{{ variant.price }}"
-                                   {{ not variant.inStock ? 'disabled' }}
+                                   {{ (stocks[variant.id] is null or stocks[variant.id].qty <= 0) ? 'disabled' }}
                                    class="peer sr-only" {{ loop.first ? 'checked' }}>
                             <span class="block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] peer-disabled:opacity-40 peer-disabled:line-through hover:border-stone-400">
                                 {{ variant.label }}
@@ -101,9 +101,9 @@
                 {% endfor %}
             </div>
         {% endif %}
-
+        
         {% if app.user %}
-        <form action="{{ path('review_create', {slug: product.slug}) }}" method="post" class="max-w-md">
+        <form action="{#{{ path('review_create', {slug: product.slug}) }}#}" method="post" class="max-w-md">
             <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">Laisser un avis</p>
             <div class="flex gap-1 mb-4">
                 {% for i in 1..5 %}
@@ -114,7 +114,7 @@
                 {% endfor %}
             </div>
             <textarea name="comment" rows="3" required placeholder="Ton avis..."
-                      class="w-full text-sm border border-stone-200 px-3 py-2 focus:outline-none focus:border-[#1B4332] mb-4"></textarea>
+                      class="w-full text-sm border border-stone-200 px-3 py-2 focus:outline-none focus:border-[#1B4332] mb-4 resize-none"></textarea>
             <button type="submit" class="text-sm bg-stone-900 text-white px-6 py-2.5 hover:bg-[#1B4332] transition-colors">
                 Envoyer
             </button>
