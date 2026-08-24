@@ -2,11 +2,12 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use App\Entity\Detail;
 use App\Entity\Purchase;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 
 class PurchaseService
 {
@@ -15,6 +16,7 @@ class PurchaseService
         private CartService $cartService,
         private CouponService $couponService,
         private StockService $stockService,
+        #[Target('purchase_status')]
         private WorkflowInterface $workflow
     ) {
     }
