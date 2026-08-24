@@ -115,7 +115,7 @@ class AppFixtures extends Fixture
             $values['couleur_' . $v] = $value;
         }
 
-        foreach (['S', 'M', 'L', 'XL'] as $v) {
+        foreach (['XS', 'S', 'M', 'L', 'XL', 'XXL'] as $v) {
             $value = new ProductAttributeValue();
             $value->setAttribute($taille);
             $value->setValue($v);
@@ -377,8 +377,6 @@ class AppFixtures extends Fixture
                     $variant->addAttributeValue($attributeValues['taille_' . $size]);
                     $manager->persist($variant);
 
-                    // Stock créé directement ici (pas via StockService) : c'est un seed initial,
-                    // pas un mouvement à tracer dans l'historique.
                     $stock = new Stock();
                     $stock->setVariant($variant);
                     $stock->setQty(random_int(10, 30));

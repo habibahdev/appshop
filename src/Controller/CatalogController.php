@@ -45,14 +45,41 @@ final class CatalogController extends AbstractController
             'isActive' => true
         ]) ?? throw $this->createNotFoundException();
 
+        $colors = [];
+        $matrix = [];
+
         $stocks = [];
         foreach ($product->getVariants() as $variant) {
-            $stocks[$variant->getId()] = $stockRepository->findOneByVariant($variant);
+            $colorValue = null;
+            $sizeValue = null;
+
+            foreach ($variant->getAttributeValues() as $attributeValue) {
+                $attrName = $attributeValue->getAttribute()?->getName();
+                if ($attrName === 'Couleur') {
+                    $colorValue = $attributeValue->getValue();
+                } elseif ($attrName === 'Taille') {
+                    $sizeValue = $attributeValue->getValue();
+                }
+            }
+
+            if ($colorValue === null || $sizeValue === null) {
+                continue;
+            }
+
+            $stock = $stockRepository->findOneByVariant($variant);
+
+            $colors[$colorValue] = true;
+            $matrix[$colorValue][$sizeValue] = [
+                'id' => $variant->getId(),
+                'price' => (float) $variant->getPrice(),
+                'inStock' => $stock !== null && $stock->getQty() > 0
+            ];
         }
 
         return $this->render('catalog/show.html.twig', [
             'product' => $product,
-            'stocks' => $stocks
+            'colors' => array_keys($colors),
+            'matrix' => $matrix
         ]);
     }
 }
