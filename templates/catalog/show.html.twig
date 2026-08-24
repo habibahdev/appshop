@@ -10,7 +10,7 @@
     <div class="grid md:grid-cols-2 gap-12 mt-8">
 
         <div>
-            <div class="aspect-[4/5] bg-stone-100 overflow-hidden">
+            <div class="aspect-4/5 bg-stone-100 overflow-hidden">
                 {% if product.images.first %}
                 <img id="main-image" src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
                      alt="{{ product.name }}" class="w-full h-full object-cover">
@@ -36,25 +36,55 @@
                 {{ product.variants.first ? product.variants.first.price|number_format(2, ',', ' ') ~ ' €' : '' }}
             </p>
 
-            <form action="{{ path('app_cart_add') }}" method="post" class="space-y-6">
+            <form action="{{ path('cart_add') }}" method="post" class="space-y-6">
                 <input type="hidden" name="product" value="{{ product.id }}">
 
+                {% if colors is not empty %}
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">
+                            Couleur — <span id="selected-color-label">{{ colors|first }}</span>
+                        </p>
+                        <div class="flex flex-wrap gap-3" id="color-swatches">
+                            {% for color in colors %}
+                            <button type="button"
+                                    data-color="{{ color }}"
+                                    class="color-swatch w-8 h-8 rounded-full ring-1 ring-stone-200 hover:ring-stone-400 transition-all"
+                                    style="background-color: {{ color_hex(color) }};"
+                                    title="{{ color }}"
+                                    aria-label="{{ color }}">
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">Taille</p>
+                        <div class="flex flex-wrap gap-2" id="size-options"></div>
+                    </div>
+
+                    <input type="hidden" name="variant" id="selected-variant-input" required>
+                </div>
+
+                <script id="variant-matrix" type="application/json">{{ matrix|json_encode|raw }}</script>
+
+                {% else %}
                 <div>
                     <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">Choisir une variante</p>
                     <div class="flex flex-wrap gap-2">
                         {% for variant in product.variants %}
                         <label class="cursor-pointer">
                             <input type="radio" name="variant" value="{{ variant.id }}"
-                                   data-price="{{ variant.price }}"
-                                   {{ (stocks[variant.id] is null or stocks[variant.id].qty <= 0) ? 'disabled' }}
-                                   class="peer sr-only" {{ loop.first ? 'checked' }}>
-                            <span class="block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] peer-disabled:opacity-40 peer-disabled:line-through hover:border-stone-400">
+                                data-price="{{ variant.price }}"
+                                class="peer sr-only" {{ loop.first ? 'checked' }}>
+                            <span class="block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] hover:border-stone-400">
                                 {{ variant.label }}
                             </span>
                         </label>
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
 
                 <button type="submit"
                         class="w-full bg-[#1B4332] text-white py-3 text-sm tracking-wide hover:bg-[#143526] transition-colors">
@@ -126,11 +156,85 @@
 </div>
 
 <script>
-document.querySelectorAll('input[name="variant"]').forEach(input => {
-    input.addEventListener('change', () => {
-        const price = parseFloat(input.dataset.price).toLocaleString('fr-FR', {minimumFractionDigits: 2});
-        document.getElementById('variant-price').textContent = price + ' €';
+document.addEventListener('DOMContentLoaded', () => {
+    const matrixEl = document.getElementById('variant-matrix');
+    if (!matrixEl) return;
+
+    const matrix = JSON.parse(matrixEl.textContent);
+    const swatches = document.querySelectorAll('.color-swatch');
+    const sizeContainer = document.getElementById('size-options');
+    const variantInput = document.getElementById('selected-variant-input');
+    const priceEl = document.getElementById('variant-price');
+    const colorLabel = document.getElementById('selected-color-label');
+
+    const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+    function renderSizes(color) {
+        sizeContainer.innerHTML = '';
+        const sizes = matrix[color] || {};
+        const sizeKeys = Object.keys(sizes).sort(
+            (a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b)
+        );
+
+        sizeKeys.forEach((size, index) => {
+            const data = sizes[size];
+
+            const label = document.createElement('label');
+            label.className = 'cursor-pointer';
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'size_choice';
+            input.value = size;
+            input.className = 'peer sr-only';
+            input.disabled = !data.inStock;
+            if (index === 0) input.checked = true;
+
+            input.addEventListener('change', () => {
+                variantInput.value = data.id;
+                if (priceEl) {
+                    priceEl.textContent = data.price.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+                }
+            });
+
+            const span = document.createElement('span');
+            span.className = 'block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] peer-disabled:opacity-40 peer-disabled:line-through hover:border-stone-400';
+            span.textContent = size;
+
+            label.appendChild(input);
+            label.appendChild(span);
+            sizeContainer.appendChild(label);
+
+            if (index === 0) {
+                variantInput.value = data.id;
+                if (priceEl) {
+                    priceEl.textContent = data.price.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+                }
+            }
+        });
+    }
+
+    function selectColor(color) {
+        swatches.forEach(sw => {
+            const isSelected = sw.dataset.color === color;
+            sw.classList.toggle('ring-2', isSelected);
+            sw.classList.toggle('ring-[#1B4332]', isSelected);
+            sw.classList.toggle('ring-offset-2', isSelected);
+            sw.classList.toggle('ring-1', !isSelected);
+            sw.classList.toggle('ring-stone-200', !isSelected);
+        });
+
+        colorLabel.textContent = color;
+        renderSizes(color);
+    }
+
+    swatches.forEach(swatch => {
+        swatch.addEventListener('click', () => selectColor(swatch.dataset.color));
     });
+
+    if (swatches.length > 0) {
+        selectColor(swatches[0].dataset.color);
+    }
 });
 </script>
 {% endblock %}

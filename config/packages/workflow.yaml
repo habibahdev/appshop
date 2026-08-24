@@ -1,2 +1,39 @@
 framework:
-    workflows: null
+    workflows:
+        purchase_status:
+            type: state_machine
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: method
+                property: status
+            supports:
+                - App\Entity\Purchase
+            initial_marking: en_attente_paiement
+            places:
+                - en_attente_paiement
+                - payee
+                - en_preparation
+                - expediee
+                - livree
+                - annulee
+                - remboursee
+            transitions:
+                payer:
+                    from: en_attente_paiement
+                    to: payee
+                preparer:
+                    from: payee
+                    to: en_preparation
+                expedier:
+                    from: en_preparation
+                    to: expediee
+                livrer:
+                    from: expediee
+                    to: livree
+                annulee:
+                    from: [en_attente_paiement, payee]
+                    to: annulee
+                remboursee:
+                    from: [payee, en_preparation, expediee, livree]
+                    to: remboursee

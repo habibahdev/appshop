@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ purchase.reference }}{% endblock %}
+
+{% block body %}
+<div class="max-w-3xl mx-auto px-6 py-12">
+
+    <a href="{{ path('app_purchase') }}" class="text-sm text-stone-500 hover:text-[#1B4332]">&larr; Mes commandes</a>
+
+    <div class="flex items-center justify-between mt-6 mb-10 pb-6 border-b border-stone-200">
+        <div>
+            <h1 class="text-2xl font-medium text-stone-900">{{ purchase.reference }}</h1>
+            <p class="text-sm text-stone-400 mt-1">{{ purchase.createdAt|date('d/m/Y à H:i') }}</p>
+        </div>
+        <span class="text-xs uppercase tracking-wide px-3 py-1.5 border border-stone-200 text-stone-600">
+            {{ purchase.status|replace({'_': ' '}) }}
+        </span>
+    </div>
+
+    <div class="divide-y divide-stone-200 mb-10">
+        {% for item in purchase.items %}
+        <div class="flex items-center justify-between py-4">
+            <div>
+                <p class="text-sm text-stone-900">{{ item.productName }}</p>
+                <p class="text-xs text-stone-400 mt-1">{{ item.variantLabel }} · Qté {{ item.qty }}</p>
+            </div>
+            <p class="text-sm text-stone-900">{{ item.subtotal|number_format(2, ',', ' ') }} €</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="space-y-2 pb-10 border-b border-stone-200">
+        {% if purchase.discount > 0 %}
+        <div class="flex justify-between text-sm">
+            <span class="text-stone-500">Réduction{{ purchase.coupon ? ' (' ~ purchase.coupon.code ~ ')' : '' }}</span>
+            <span class="text-[#1B4332]">&minus;{{ purchase.discount|number_format(2, ',', ' ') }} €</span>
+        </div>
+        {% endif %}
+        <div class="flex justify-between text-base">
+            <span class="text-stone-900">Total</span>
+            <span class="text-stone-900">{{ purchase.total|number_format(2, ',', ' ') }} €</span>
+        </div>
+    </div>
+
+    <div class="mt-8 flex items-center justify-between">
+        <div>
+            <p class="text-xs uppercase tracking-wide text-stone-400 mb-2">Livraison</p>
+            <p class="text-sm text-stone-600">{{ purchase.delivery }}</p>
+        </div>
+
+        {% if purchase.invoice %}
+        <a href="{{ path('invoice_download', {number: purchase.invoice.number}) }}"
+           class="text-sm text-[#1B4332] hover:underline">
+            Télécharger la facture
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
