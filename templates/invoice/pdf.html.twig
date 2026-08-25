@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body { font-family: sans-serif; color: #1C1C1A; font-size: 13px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+    h1 { font-size: 20px; font-weight: 500; margin: 0; }
+    .muted { color: #78716C; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th { text-align: left; font-size: 11px; text-transform: uppercase; color: #78716C; border-bottom: 1px solid #E7E5E4; padding-bottom: 8px; }
+    td { padding: 10px 0; border-bottom: 1px solid #E7E5E4; }
+    .total-row td { border: none; font-weight: 500; padding-top: 16px; }
+    .accent { color: #1B4332; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Facture {{ number }}</h1>
+            <p class="muted">{{ purchase.createdAt|date('d/m/Y') }}</p>
+        </div>
+        <div style="text-align: right;">
+            <p><strong>{{ purchase.user.fullName ?? purchase.user.email }}</strong></p>
+            <p class="muted">{{ purchase.delivery }}</p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Qté</th>
+                <th style="text-align: right;">Prix unitaire</th>
+                <th style="text-align: right;">Sous-total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in purchase.items %}
+            <tr>
+                <td>{{ item.productName }} — {{ item.variantLabel }}</td>
+                <td>{{ item.qty }}</td>
+                <td style="text-align: right;">{{ item.unitPrice|number_format(2, ',', ' ') }} €</td>
+                <td style="text-align: right;">{{ item.subtotal|number_format(2, ',', ' ') }} €</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            {% if purchase.discount > 0 %}
+            <tr class="total-row">
+                <td colspan="3">Réduction {{ purchase.coupon ? '(' ~ purchase.coupon.code ~ ')' : '' }}</td>
+                <td class="accent" style="text-align: right;">&minus;{{ purchase.discount|number_format(2, ',', ' ') }} €</td>
+            </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td colspan="3">Total</td>
+                <td style="text-align: right;">{{ purchase.total|number_format(2, ',', ' ') }} €</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
