@@ -36,58 +36,99 @@
                 {{ product.variants.first ? product.variants.first.price|number_format(2, ',', ' ') ~ ' €' : '' }}
             </p>
 
-            <form action="{{ path('cart_add') }}" method="post" class="space-y-6">
+            <form action="{{ path('app_cart_add') }}" method="post" class="space-y-6">
                 <input type="hidden" name="product" value="{{ product.id }}">
 
                 {% if colors is not empty %}
-                <div class="space-y-6">
+                    <div class="space-y-6">
+
+                        {# =========================
+                        TAILLE
+                        ========================= #}
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">
+                                Taille —
+                                <span id="selected-size-label">Choisir</span>
+                            </p>
+
+                            <div class="flex flex-wrap gap-2" id="size-options"></div>
+                        </div>
+
+                        {# =========================
+                        COULEUR
+                        ========================= #}
+                        <div>
+                            <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">
+                                Couleur —
+                                <span id="selected-color-label">Choisir</span>
+                            </p>
+
+                            <div class="flex flex-wrap gap-3" id="color-swatches">
+
+                                {% for color in colors %}
+                                    <button
+                                        type="button"
+                                        data-color="{{ color }}"
+                                        class="color-swatch w-9 h-9 rounded-full ring-1 ring-stone-200 opacity-40 cursor-not-allowed transition-all"
+                                        style="background-color: {{ color_hex(color) }};"
+                                        title="{{ color }}"
+                                        aria-label="{{ color }}"
+                                    ></button>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+
+                        <input
+                            type="hidden"
+                            name="variant"
+                            id="selected-variant-input"
+                            required
+                        >
+
+                    </div>
+
+                    <script id="variant-matrix" type="application/json">
+                        {{ matrix|json_encode|raw }}
+                    </script>
+
+                {% else %}
+
                     <div>
                         <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">
-                            Couleur — <span id="selected-color-label">{{ colors|first }}</span>
+                            Choisir une variante
                         </p>
-                        <div class="flex flex-wrap gap-3" id="color-swatches">
-                            {% for color in colors %}
-                            <button type="button"
-                                    data-color="{{ color }}"
-                                    class="color-swatch w-8 h-8 rounded-full ring-1 ring-stone-200 hover:ring-stone-400 transition-all"
-                                    style="background-color: {{ color_hex(color) }};"
-                                    title="{{ color }}"
-                                    aria-label="{{ color }}">
-                            </button>
+
+                        <div class="flex flex-wrap gap-2">
+
+                            {% for variant in product.variants %}
+
+                                <label class="cursor-pointer">
+
+                                    <input
+                                        type="radio"
+                                        name="variant"
+                                        value="{{ variant.id }}"
+                                        data-price="{{ variant.price }}"
+                                        class="peer sr-only"
+                                        {{ loop.first ? 'checked' }}
+                                    >
+
+                                    <span class="block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] hover:border-stone-400">
+                                        {{ variant.label }}
+                                    </span>
+
+                                </label>
+
                             {% endfor %}
+
                         </div>
                     </div>
 
-                    <div>
-                        <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">Taille</p>
-                        <div class="flex flex-wrap gap-2" id="size-options"></div>
-                    </div>
-
-                    <input type="hidden" name="variant" id="selected-variant-input" required>
-                </div>
-
-                <script id="variant-matrix" type="application/json">{{ matrix|json_encode|raw }}</script>
-
-                {% else %}
-                <div>
-                    <p class="text-xs uppercase tracking-wide text-stone-400 mb-3">Choisir une variante</p>
-                    <div class="flex flex-wrap gap-2">
-                        {% for variant in product.variants %}
-                        <label class="cursor-pointer">
-                            <input type="radio" name="variant" value="{{ variant.id }}"
-                                data-price="{{ variant.price }}"
-                                class="peer sr-only" {{ loop.first ? 'checked' }}>
-                            <span class="block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] hover:border-stone-400">
-                                {{ variant.label }}
-                            </span>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
                 {% endif %}
 
                 <button type="submit"
-                        class="w-full bg-[#1B4332] text-white py-3 text-sm tracking-wide hover:bg-[#143526] transition-colors">
+                        class="w-full bg-[#1B4332] text-white py-3 text-sm tracking-wide cursor-pointer hover:bg-[#143526] transition-colors">
                     Ajouter au panier
                 </button>
             </form>
@@ -157,84 +198,473 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const matrixEl = document.getElementById('variant-matrix');
-    if (!matrixEl) return;
 
-    const matrix = JSON.parse(matrixEl.textContent);
-    const swatches = document.querySelectorAll('.color-swatch');
+    const matrixElement = document.getElementById('variant-matrix');
+
+    if (!matrixElement) {
+        return;
+    }
+
+    const matrix = JSON.parse(matrixElement.textContent);
+
     const sizeContainer = document.getElementById('size-options');
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+
     const variantInput = document.getElementById('selected-variant-input');
-    const priceEl = document.getElementById('variant-price');
-    const colorLabel = document.getElementById('selected-color-label');
 
-    const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    const priceElement = document.getElementById('variant-price');
 
-    function renderSizes(color) {
+    const selectedSizeLabel =
+        document.getElementById('selected-size-label');
+
+    const selectedColorLabel =
+        document.getElementById('selected-color-label');
+
+
+    /*
+     * ==========================================================
+     * ORDRE DES TAILLES
+     * ==========================================================
+     */
+
+    const sizeOrder = [
+        'XS',
+        'S',
+        'M',
+        'L',
+        'XL',
+        'XXL'
+    ];
+
+
+    /*
+     * ==========================================================
+     * RÉCUPÉRATION DE TOUTES LES TAILLES
+     * ==========================================================
+     */
+
+    const allSizes = new Set();
+
+    Object.keys(matrix).forEach(color => {
+
+        Object.keys(matrix[color]).forEach(size => {
+
+            allSizes.add(size);
+
+        });
+
+    });
+
+
+    /*
+     * ==========================================================
+     * TRI DES TAILLES
+     * ==========================================================
+     */
+
+    const sizes = Array.from(allSizes).sort((a, b) => {
+
+        const indexA = sizeOrder.indexOf(a);
+        const indexB = sizeOrder.indexOf(b);
+
+        if (indexA === -1 && indexB === -1) {
+            return a.localeCompare(b);
+        }
+
+        if (indexA === -1) {
+            return 1;
+        }
+
+        if (indexB === -1) {
+            return -1;
+        }
+
+        return indexA - indexB;
+
+    });
+
+
+    /*
+     * ==========================================================
+     * RÉCUPÉRER LES COULEURS D'UNE TAILLE
+     * ==========================================================
+     */
+
+    function getColorsForSize(size) {
+
+        const result = {};
+
+        Object.keys(matrix).forEach(color => {
+
+            if (matrix[color][size]) {
+
+                result[color] = matrix[color][size];
+
+            }
+
+        });
+
+        return result;
+
+    }
+
+
+    /*
+     * ==========================================================
+     * AFFICHER LES TAILLES
+     * ==========================================================
+     */
+
+    function renderSizes() {
+
         sizeContainer.innerHTML = '';
-        const sizes = matrix[color] || {};
-        const sizeKeys = Object.keys(sizes).sort(
-            (a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b)
-        );
 
-        sizeKeys.forEach((size, index) => {
-            const data = sizes[size];
+        sizes.forEach((size, index) => {
 
             const label = document.createElement('label');
+
             label.className = 'cursor-pointer';
 
+
             const input = document.createElement('input');
+
             input.type = 'radio';
             input.name = 'size_choice';
             input.value = size;
-            input.className = 'peer sr-only';
-            input.disabled = !data.inStock;
-            if (index === 0) input.checked = true;
 
-            input.addEventListener('change', () => {
-                variantInput.value = data.id;
-                if (priceEl) {
-                    priceEl.textContent = data.price.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-                }
-            });
+            input.className = 'peer sr-only';
+
 
             const span = document.createElement('span');
-            span.className = 'block px-4 py-2 text-sm border border-stone-200 peer-checked:border-[#1B4332] peer-checked:text-[#1B4332] peer-disabled:opacity-40 peer-disabled:line-through hover:border-stone-400';
+
+            span.className = `
+                flex
+                items-center
+                justify-center
+                min-w-12
+                h-10
+                px-3
+                rounded-full
+                border
+                border-stone-200
+                text-sm
+                transition-all
+                hover:border-stone-400
+                peer-checked:border-[#1B4332]
+                peer-checked:bg-[#1B4332]
+                peer-checked:text-white
+            `;
+
             span.textContent = size;
+
+
+            input.addEventListener('change', () => {
+
+                selectSize(size);
+
+            });
+
 
             label.appendChild(input);
             label.appendChild(span);
+
             sizeContainer.appendChild(label);
 
+
+            /*
+             * Première taille sélectionnée
+             */
             if (index === 0) {
-                variantInput.value = data.id;
-                if (priceEl) {
-                    priceEl.textContent = data.price.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-                }
+
+                input.checked = true;
+
             }
-        });
-    }
 
-    function selectColor(color) {
-        swatches.forEach(sw => {
-            const isSelected = sw.dataset.color === color;
-            sw.classList.toggle('ring-2', isSelected);
-            sw.classList.toggle('ring-[#1B4332]', isSelected);
-            sw.classList.toggle('ring-offset-2', isSelected);
-            sw.classList.toggle('ring-1', !isSelected);
-            sw.classList.toggle('ring-stone-200', !isSelected);
         });
 
-        colorLabel.textContent = color;
-        renderSizes(color);
     }
 
-    swatches.forEach(swatch => {
-        swatch.addEventListener('click', () => selectColor(swatch.dataset.color));
+
+    /*
+     * ==========================================================
+     * AFFICHER LES COULEURS POUR UNE TAILLE
+     * ==========================================================
+     */
+
+    function renderColors(size) {
+
+        const colorsForSize = getColorsForSize(size);
+
+
+        colorSwatches.forEach(swatch => {
+
+            const color = swatch.dataset.color;
+
+            const variant = colorsForSize[color];
+
+
+            /*
+             * Réinitialisation
+             */
+            swatch.classList.remove(
+                'ring-2',
+                'ring-[#1B4332]',
+                'ring-offset-2',
+                'opacity-20',
+                'opacity-30',
+                'opacity-40',
+                'cursor-pointer',
+                'cursor-not-allowed'
+            );
+
+
+            /*
+             * La couleur n'existe pas pour cette taille
+             */
+            if (!variant) {
+
+                swatch.disabled = true;
+
+                swatch.classList.add(
+                    'opacity-20',
+                    'cursor-not-allowed'
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * La couleur existe mais est en rupture
+             */
+            if (!variant.inStock) {
+
+                swatch.disabled = true;
+
+                swatch.classList.add(
+                    'opacity-30',
+                    'cursor-not-allowed'
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * La couleur est disponible
+             */
+            swatch.disabled = false;
+
+            swatch.classList.add(
+                'opacity-100',
+                'cursor-pointer'
+            );
+
+        });
+
+    }
+
+
+    /*
+     * ==========================================================
+     * SÉLECTIONNER UNE COULEUR
+     * ==========================================================
+     */
+
+    function selectColor(color, size) {
+
+        const variant = matrix[color]?.[size];
+
+
+        /*
+         * Sécurité
+         */
+        if (!variant || !variant.inStock) {
+
+            return;
+
+        }
+
+
+        /*
+         * Mise à jour du texte
+         *
+         * IMPORTANT :
+         * c'est ici que "Couleur — Noir"
+         * devient par exemple "Couleur — Rouge"
+         */
+        selectedColorLabel.textContent = color;
+
+
+        /*
+         * Mise à jour de la variante
+         */
+        variantInput.value = variant.id;
+
+
+        /*
+         * Mise à jour du prix
+         */
+        if (priceElement) {
+
+            priceElement.textContent =
+                variant.price.toLocaleString(
+                    'fr-FR',
+                    {
+                        minimumFractionDigits: 2
+                    }
+                ) + ' €';
+
+        }
+
+
+        /*
+         * Mise à jour visuelle des pastilles
+         */
+        colorSwatches.forEach(swatch => {
+
+            const isSelected =
+                swatch.dataset.color === color;
+
+
+            swatch.classList.toggle(
+                'ring-2',
+                isSelected
+            );
+
+            swatch.classList.toggle(
+                'ring-[#1B4332]',
+                isSelected
+            );
+
+            swatch.classList.toggle(
+                'ring-offset-2',
+                isSelected
+            );
+
+        });
+
+    }
+
+
+    /*
+     * ==========================================================
+     * SÉLECTIONNER UNE TAILLE
+     * ==========================================================
+     */
+
+    function selectSize(size) {
+
+        /*
+         * Mise à jour du texte
+         */
+        selectedSizeLabel.textContent = size;
+
+
+        /*
+         * Afficher uniquement les couleurs
+         * disponibles pour cette taille
+         */
+        renderColors(size);
+
+
+        /*
+         * Récupération des couleurs disponibles
+         */
+        const colorsForSize = getColorsForSize(size);
+
+
+        /*
+         * Cherche la première couleur disponible
+         */
+        const firstAvailableColor =
+            Object.entries(colorsForSize)
+                .find(([, variant]) => variant.inStock);
+
+
+        /*
+         * Aucune couleur disponible
+         */
+        if (!firstAvailableColor) {
+
+            selectedColorLabel.textContent = 'Aucune';
+
+            variantInput.value = '';
+
+            if (priceElement) {
+
+                priceElement.textContent = '';
+
+            }
+
+            return;
+
+        }
+
+
+        /*
+         * Sélection automatique de la première couleur
+         */
+        const firstColor = firstAvailableColor[0];
+
+        selectColor(firstColor, size);
+
+    }
+
+
+    /*
+     * ==========================================================
+     * CLIC SUR UNE COULEUR
+     * ==========================================================
+     */
+
+    colorSwatches.forEach(swatch => {
+
+        swatch.addEventListener('click', () => {
+
+            const selectedSize =
+                document.querySelector(
+                    'input[name="size_choice"]:checked'
+                )?.value;
+
+
+            if (!selectedSize) {
+
+                return;
+
+            }
+
+
+            const color = swatch.dataset.color;
+
+
+            selectColor(
+                color,
+                selectedSize
+            );
+
+        });
+
     });
 
-    if (swatches.length > 0) {
-        selectColor(swatches[0].dataset.color);
+
+    /*
+     * ==========================================================
+     * INITIALISATION
+     * ==========================================================
+     */
+
+    renderSizes();
+
+
+    if (sizes.length > 0) {
+
+        selectSize(sizes[0]);
+
     }
+
 });
 </script>
 {% endblock %}

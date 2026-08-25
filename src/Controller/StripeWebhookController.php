@@ -14,18 +14,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class StripeWebhookController extends AbstractController
 {
+    public function __construct(private readonly string $stripeWebhookSecret)
+    {
+    }
+
     #[Route('/stripe/webhook', name: 'app_stripe_webhook', methods: ['POST'])]
     public function handle(
         Request $request,
         StripeService $stripeService,
-        string $stripeWebhook,
         MessageBusInterface $bus
     ): Response {
         $payload = $request->getContent();
         $signature = $request->headers->get('stripe-signature');
 
         try {
-            $event = $stripeService->constructWebhookEvent($payload, $signature, $stripeWebhook);
+            $event = $stripeService->constructWebhookEvent($payload, $signature, $this->stripeWebhookSecret);
         } catch (\UnexpectedValueException | SignatureVerificationException $e) {
             return new Response('Signature invalide', Response::HTTP_BAD_REQUEST);
         }
