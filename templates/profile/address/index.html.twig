@@ -27,9 +27,9 @@
             <p class="text-sm text-stone-500">{{ address.street }}, {{ address.postalCode }} {{ address.city }}, {{ address.country }}</p>
 
             <div class="flex gap-4 mt-3">
-                <a href="{{ path('app_profile_address_edit', { id: address.id }) }}" class="text-xs text-[#1B4332] hover:underline">Modifier</a>
+                <a href="{{ path('app_profile_address_edit', { id: address.id }) }}" class="text-xs cursor-pointer text-[#1B4332] hover:underline">Modifier</a>
                 <form action="{{ path('app_profile_address_delete', { id: address.id }) }}" method="post" onsubmit="return confirm('Supprimer cette adresse ?')">
-                    <button type="submit" class="text-xs text-stone-400 hover:text-red-600">Supprimer</button>
+                    <button type="submit" class="text-xs text-stone-400 cursor-pointer hover:text-red-600">Supprimer</button>
                 </form>
             </div>
         </div>
