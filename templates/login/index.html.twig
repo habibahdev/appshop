@@ -7,28 +7,34 @@
 
     <h1 class="text-2xl font-medium text-stone-900 mb-10">Connexion</h1>
 
-    {% if error %}
-    <div class="text-sm text-red-600 mb-6">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+        {% if error %}
+            <div class="text-sm text-red-600 mb-6">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
 
     <form method="post" class="space-y-5">
         <div>
             <label for="username" class="text-xs uppercase tracking-wide text-stone-400 mb-2 block">Email</label>
             <input type="email" name="_username" id="username" value="{{ last_username }}" required autofocus
-                   class="w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]">
+            class="w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]">
         </div>
 
         <div>
             <label for="password" class="text-xs uppercase tracking-wide text-stone-400 mb-2 block">Mot de passe</label>
             <input type="password" name="_password" id="password" required
-                   class="w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]">
+            class="w-full text-sm border border-stone-200 px-3 py-2.5 focus:outline-none focus:border-[#1B4332]">
         </div>
 
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="_remember_me" id="remember_me" checked
+            class="w-4 h-4 border-stone-300 text-[#1B4332] focus:ring-0 focus:ring-offset-0 cursor-pointer">
+            <span class="text-sm text-stone-500">Rester connecté</span>
+        </label>
+
         <button type="submit"
-                class="w-full bg-stone-900 text-white py-3 cursor-pointer text-sm tracking-wide hover:bg-[#1B4332] transition-colors mt-2">
-            Se connecter
+        class="w-full bg-stone-900 text-white py-3 cursor-pointer text-sm tracking-wide hover:bg-[#1B4332] transition-colors mt-2">
+                    Se connecter
         </button>
     </form>
 
@@ -37,7 +43,7 @@
     </p>
 
     <p class="text-sm text-stone-500 mt-2 text-center">
-        Pas encore de compte ?
+            Pas encore de compte ?
         <a href="{{ path('app_register') }}" class="text-[#1B4332] hover:underline">Créer un compte</a>
     </p>
 </div>

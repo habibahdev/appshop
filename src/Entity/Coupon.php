@@ -52,6 +52,11 @@ class Coupon
         $this->purchases = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->code;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

@@ -7,7 +7,7 @@
 
     <div class="flex items-end justify-between mb-10 border-b border-stone-200 pb-6">
         <h1 class="text-2xl font-medium text-stone-900">Catalogue</h1>
-        <span class="text-sm text-stone-500">{{ totalProducts }} produit{{ totalProducts > 1 ? 's' : '' }}</span>
+        <span class="text-sm text-stone-900">{{ totalProducts }} produit{{ totalProducts > 1 ? 's' : '' }}</span>
     </div>
 
     <div class="flex flex-col md:flex-row gap-10">
@@ -54,7 +54,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
                 {% for product in products %}
                 <a href="{{ path('app_product_show', {slug: product.slug}) }}" class="group block">
-                    <div class="aspect-[4/5] bg-stone-100 mb-3 overflow-hidden">
+                    <div class="aspect-4/5 bg-stone-100 mb-3 overflow-hidden">
                         {#{% if product.images.first %}
                         <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
                              alt="{{ product.name }}"
