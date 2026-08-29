@@ -1,0 +1,118 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Tableau de bord{% endblock %}
+
+{% block main %}
+<div class="max-w-6xl">
+
+    <div class="mb-10">
+        <p class="text-xs uppercase tracking-widest text-stone-400 mb-1">{{ 'now'|date('l d F Y') }}</p>
+        <h1 class="text-2xl font-medium text-stone-900">Bonjour, voici l'état de la boutique</h1>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-stone-200 border border-stone-200 mb-12">
+
+        <div class="bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs uppercase tracking-wide text-stone-400">CA ce mois</p>
+                <svg class="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v12m-4-4l4 4 4-4M6 6h12" />
+                </svg>
+            </div>
+            <p class="text-2xl text-stone-900">{{ revenueThisMonth|number_format(0, ',', ' ') }} €</p>
+        </div>
+
+        <div class="bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs uppercase tracking-wide text-stone-400">Commandes ce mois</p>
+                <svg class="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 2.25h6a1.5 1.5 0 011.5 1.5v.75H7.5v-.75A1.5 1.5 0 019 2.25zM4.5 6.75h15l-1 13.5a1.5 1.5 0 01-1.5 1.5H7a1.5 1.5 0 01-1.5-1.5l-1-13.5z" />
+                </svg>
+            </div>
+            <p class="text-2xl text-stone-900">{{ purchasesThisMonth }}</p>
+        </div>
+
+        <div class="bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs uppercase tracking-wide text-stone-400">À préparer</p>
+                <svg class="w-4 h-4 {{ pendingPurchases > 0 ? 'text-[#1B4332]' : 'text-stone-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="text-2xl {{ pendingPurchases > 0 ? 'text-[#1B4332]' : 'text-stone-900' }}">{{ pendingPurchases }}</p>
+        </div>
+
+        <div class="bg-white p-6">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs uppercase tracking-wide text-stone-400">Stock faible</p>
+                <svg class="w-4 h-4 {{ lowStockEntries|length > 0 ? 'text-red-500' : 'text-stone-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+            </div>
+            <p class="text-2xl {{ lowStockEntries|length > 0 ? 'text-red-600' : 'text-stone-900' }}">{{ lowStockEntries|length }}</p>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-12">
+
+        <div>
+            <div class="flex items-center justify-between mb-5 pb-3 border-b border-stone-200">
+                <h2 class="text-sm font-medium text-stone-900">À préparer</h2>
+                {% if pendingPurchases > 0 %}
+                <a href="{{ ea_url().setController('App\\Controller\\Admin\\PurchaseCrudController') }}"
+                   class="text-xs text-[#1B4332] hover:underline">Voir tout &rarr;</a>
+                {% endif %}
+            </div>
+
+            {% if pendingPurchases == 0 %}
+                <div class="py-8 text-center">
+                    <p class="text-sm text-stone-400">Rien à préparer pour le moment.</p>
+                </div>
+            {% else %}
+                <div class="flex items-center gap-3 py-2">
+                    <span class="w-2 h-2 rounded-full bg-[#1B4332] shrink-0"></span>
+                    <p class="text-sm text-stone-600">
+                        {{ pendingPurchases }} commande{{ pendingPurchases > 1 ? 's' : '' }} payée{{ pendingPurchases > 1 ? 's' : '' }}
+                        en attente de préparation.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <div class="flex items-center justify-between mb-5 pb-3 border-b border-stone-200">
+                <h2 class="text-sm font-medium text-stone-900">Stock faible</h2>
+                {% if lowStockEntries is not empty %}
+                <a href="{{ ea_url().setController('App\\Controller\\Admin\\StockCrudController') }}"
+                   class="text-xs text-[#1B4332] hover:underline">Voir tout &rarr;</a>
+                {% endif %}
+            </div>
+
+            {% if lowStockEntries is empty %}
+                <div class="py-8 text-center">
+                    <p class="text-sm text-stone-400">Aucune alerte de stock.</p>
+                </div>
+            {% else %}
+                <div class="divide-y divide-stone-100">
+                    {% for stock in lowStockEntries|slice(0, 6) %}
+                    <div class="flex items-center justify-between py-3">
+                        <div>
+                            <p class="text-sm text-stone-900">{{ stock.variant.product.name }}</p>
+                            <p class="text-xs text-stone-400 mt-0.5">{{ stock.variant.label }}</p>
+                        </div>
+                        <span class="text-xs px-2 py-1 border border-red-200 text-red-600 shrink-0">
+                            {{ stock.qty }} restant{{ stock.qty > 1 ? 's' : '' }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if lowStockEntries|length > 6 %}
+                <p class="text-xs text-stone-400 mt-3">+ {{ lowStockEntries|length - 6 }} autre{{ (lowStockEntries|length - 6) > 1 ? 's' : '' }} alerte{{ (lowStockEntries|length - 6) > 1 ? 's' : '' }}</p>
+                {% endif %}
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

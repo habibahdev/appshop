@@ -17,7 +17,7 @@ enum PurchaseStatus: string
         return match ($this) {
             self::CANCELLED => 'Annulée',
             self::DELIVERED => 'Livrée',
-            self::SHIPPED => 'expédiée',
+            self::SHIPPED => 'Expédiée',
             self::PENDING => 'En attente de paiement',
             self::PREPARATION => 'En préparation',
             self::REFUNDED => 'Remboursée',
