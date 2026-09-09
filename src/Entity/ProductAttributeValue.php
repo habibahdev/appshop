@@ -3,10 +3,17 @@
 namespace App\Entity;
 
 use App\Repository\ProductAttributeValueRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Valeur concrète d'un {@see ProductAttribute} (ex. "Bleu" pour l'attribut "Couleur").
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id Identifiant.
+ * @property string|null $value
+ * @property ProductAttribute|null $attribute
+ */
 #[ORM\Entity(repositoryClass: ProductAttributeValueRepository::class)]
 class ProductAttributeValue
 {
@@ -51,6 +58,11 @@ class ProductAttributeValue
         return $this;
     }
 
+    /**
+     * Représentation lisible de la valeur, ex. "Couleur: Bleu".
+     *
+     * @return string
+     */
     public function __toString(): string
     {
         return sprintf('%s: %s', $this->attribute?->getName(), $this->value);

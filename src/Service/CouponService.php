@@ -9,6 +9,12 @@ use App\Util\Money;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+/**
+ * Gestion des coupons de réduction appliqué au panier courant, stocké en
+ * session (clé `coupon_code`).
+ *
+ * @package App\Service
+ */
 class CouponService
 {
     private const SESSION_KEY = 'coupon_code';
@@ -20,6 +26,14 @@ class CouponService
     ) {
     }
 
+    /**
+     * Valide et applique un code promo au panier courant.
+     *
+     * @param string $code Code du coupon (insensible à la casse).
+     * @return Coupon Le coupon appliqué.
+     * @throws \InvalidArgumentException Si le code est invalide, inactif,
+     * expiré, épuisé, ou si le montant minimum du panuer n'est pas atteint.
+     */
     public function apply(string $code): Coupon
     {
         $coupon = $this->couponRepository->findOneBy(['code' => strtoupper($code)]);
@@ -56,11 +70,23 @@ class CouponService
         return $coupon;
     }
 
+    /**
+     * Retire le coupon appliqué de la session.
+     *
+     * @return void
+     */
     public function remove(): void
     {
         $this->getSession()->remove(self::SESSION_KEY);
     }
 
+    /**
+     * Coupon actuellement appliqué, revalidé à chaque leecture.
+     * Un coupon devenu invalide entre-temps (expiration, épuisement) est
+     * automatiquement retiré de la session avant retour.
+     *
+     * @return Coupon|null
+     */
     public function getApplied(): ?Coupon
     {
         $code = $this->getSession()->get(self::SESSION_KEY);
@@ -78,7 +104,11 @@ class CouponService
     }
 
     /**
-     * @return numeric-string
+     * Calcule le montant de réduction à appliquer au panier.
+     *
+     * @param string $cartTotal Total du panier avant réduction.
+     * @param Coupon|null $coupon Coupon à évaluer ; si null, utilise {@see getApplied()}
+     * @return numeric-string Montant de la réduction, jamais supérieur à $cartTotal.
      */
     public function calculateDiscount(string $cartTotal, ?Coupon $coupon = null): string
     {

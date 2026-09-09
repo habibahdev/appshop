@@ -9,6 +9,29 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Commande passée par un {@see User}. Pivot central du tunnel d'achat.
+ *
+ * Le champ {@see $status} est piloté exclusivement par le composant
+ * workflow Symfony (`purchase_status`) - ne jamais appeler {@see setStatus()}
+ * directement en dehors de {@see \App\Service\PurchaseService}.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property string|null $reference Identifiant public unique.
+ * @property User|null $user
+ * @property PurchaseStatus|null $status
+ * @property string|null $total Montant final (decimal).
+ * @property string|null $discount Montant de réduction appliqué (decimal).
+ * @property Coupon|null $coupon
+ * @property string|null $delivery Adresse figée en texte au moment de l'achat (snapshot indépendant de [@see Address])
+ * @property string|null $stripe ID du PaymentIntentStripe.
+ * @property Collection<int, Detail> $details
+ * @property Invoice|null $invoice
+ * @property Collection<int, StockMovement> $stockMovements
+ * @property-read \DateTimeImmutable|null $createdAt
+ */
 #[ORM\Entity(repositoryClass: PurchaseRepository::class)]
 class Purchase
 {

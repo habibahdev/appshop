@@ -44,6 +44,13 @@ class AppExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * Convertit un nom de couleur en hexadécimal, pour l'affichage
+     * des pastilles de sélection sur la fiche produit.
+     *
+     * @param string $name Nom de la couleur (insensible à la casse).
+     * @return string Code hex (ex. `#2563B`), ou `#A8A29E` (gris neutre) si non reconnu.
+     */
     public function colorhex(string $name): string
     {
         return self::COLOR_MAP[mb_strtolower($name)] ?? '#A8A29E';

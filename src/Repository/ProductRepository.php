@@ -55,7 +55,8 @@ class ProductRepository extends ServiceEntityRepository
 
         if ($categoryId) {
             $query
-                ->andWhere('p.category = :categoryId')
+                ->leftJoin('p.category', 'c')
+                ->andWhere('p.category = :categoryId OR c.parent = :categoryId')
                 ->setParameter('categoryId', $categoryId)
             ;
         }

@@ -10,6 +10,28 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * Utilisateur de l'application (client ou administrateur).
+ *
+ * Implémente le contrat de sécurité Symfony pour l'authentification par mot de passe.
+ * Le rôle ROLE_USER est garanti pour tout utilisateur authentifié, que
+ * que soit le contenu de {@see $roles}.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id Identifiant.
+ * @property string|null $email Identifiant de connexion, unique.
+ * @property string|null $firstname Prénom.
+ * @property string|null $lastname Nom.
+ * @property string|null $phone Téléphone, optionnel.
+ * @property list<string> $roles Rôles Symfony bruts.
+ * @property string|null $password Hash du mot de passe.
+ * @property bool|null $isVerified Email confirmé.
+ *
+ * @see \App\Entity\Purchase Commandes passées par l'utilisateur.
+ * @see \App\Entity\Address Carnet d'adresses de livraison.
+ */
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]

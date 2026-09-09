@@ -10,6 +10,11 @@ use App\Repository\ReviewRepository;
 use App\Repository\PurchaseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Gestion de la création d'avis produit.
+ *
+ * @package App\Service
+ */
 class ReviewService
 {
     public function __construct(
@@ -19,6 +24,22 @@ class ReviewService
     ) {
     }
 
+    /**
+     * Crée un avis pour un produit.
+     *
+     * Le champ {@see Review::$verifiedPurchase} est calculé automatiquement
+     * en vérifiant qu'une commande de l'utilisateur, à un statut payé ou
+     * au-delà (PAID, PREPARATION, SHIPPED, DELIVERED), contient une variante
+     * du produit concerné. L'avis créé a le statut {@see ReviewStatus::PENDING}
+     * par défaut.
+     *
+     * @param Product $product Produit concerné.
+     * @param User $user Auteur de l'avis.
+     * @param integer $rating Note de 1 à 5.
+     * @param string $comment Commentaire libre.
+     * @return Review L'avis créé.
+     * @throws \InvalidArgumentException SI l'utilisateur a déjà laissé un avis sur ce produit.
+     */
     public function create(Product $product, User $user, int $rating, string $comment): Review
     {
         if ($this->reviewRepository->hasUserReviewed($product, $user)) {

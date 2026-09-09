@@ -29,6 +29,21 @@
                                class="{{ currentCategory == category.id ? 'text-[#1B4332] font-medium' : 'text-stone-500' }} hover:text-[#1B4332]">
                                 {{ category.name }}
                             </a>
+
+                            {% if category.children is not empty and (currentCategory == category.id or selectCategory and selectCategory.parent and selectCategory.parent.id == category.id) %}
+                            <ul class="ml-4 mt-2 space-y-1.5">
+                                {% for child in category.children %}
+                                    <li>
+                                        <a href="{{ path('app_catalog', {categorie: child.id}) }}"
+                                            class="text-xs {{ currentCategory == child.id ? 'text-[#1B4332]
+                                            font-medium' : 'text-stone-400' }} hover:text-[#1B4332]"
+                                        >
+                                            {{ child.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
                         </li>
                         {% endfor %}
                     </ul>

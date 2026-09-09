@@ -8,6 +8,25 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Déclinaison vendable d'un {@see Product} (ex. T-shirt Noir / M).
+ *
+ * C'est cette entité - jamais Product directement - qui  porte le prix et
+ * qui est référencée dans le panier et les commandes.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property string|null $sku
+ * @property string|null $price Format décimal (DECIMAL(10,2)).
+ * @property Collection<int, ProductAttributeValue> $attributeValues
+ * @property bool|null $isActive
+ * @property Product|null $product
+ *
+ * @note Aucune relation directe vers {@see Stock} n'existe sur cette entité
+ * (design volontairement unidirectionnel). Toujours résoudre le stock d'une
+ * variante via {@see \App\Repository\StockRepository::findOneByVariant()}.
+ */
 #[ORM\Entity(repositoryClass: ProductVariantRepository::class)]
 class ProductVariant
 {
@@ -118,6 +137,11 @@ class ProductVariant
         return $this;
     }
 
+    /**
+     * Libellé lisible concaténant les valeurs d'attributs de la variante.
+     *
+     * @return string Ex. "Couleur: Bleu, Taille: M".
+     */
     public function getLabel(): string
     {
         return implode(', ', array_map(fn ($v) => (string) $v, $this->attributeValues->toArray()));

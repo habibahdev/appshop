@@ -9,6 +9,11 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Twig\Environment;
 
+/**
+ * Génération de facture PDF pour une commande payée.
+ *
+ * @package App\Service
+ */
 class InvoiceService
 {
     public function __construct(
@@ -18,6 +23,18 @@ class InvoiceService
     ) {
     }
 
+    /**
+     * Génère et persiste la facture PDF d'une commande.
+     *
+     * Rend le template `invoice/pdf.html.twig`, le convertit en PDF via
+     * Dompdf (chargement de ressources distantes désactivé), ércit le
+     * fichier sur `invoice_storage_path`, et persiste l'entité {@see Invoice}.
+     *
+     * Appelée de façon asynchrone via {@see \App\MessageHandler\GenerateInvoiceHandler}.
+     *
+     * @param Purchase $purchase Commande à facturer.
+     * @return Invoice La facture générée.
+     */
     public function generate(Purchase $purchase): Invoice
     {
         $number = 'FAC-' . date('Y') . '-' . str_pad((string) $purchase->getId(), 6, '0', STR_PAD_LEFT);

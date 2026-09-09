@@ -8,6 +8,10 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
+ * Contrôle d'accès aux commandes : le propriétaire de la commande ou un
+ * administrateur (ROLE_ADMIN, pour le support client) peuvent la consulter.
+ *
+ * @package App\Security\Voter
  * @extends Voter<string, Purchase>
  */
 class PurchaseVoter extends Voter

@@ -10,6 +10,12 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
+/**
+ * Redirige les utilisateurs à l'email non vérifié loin des routes
+ * protégées, vers la liste de leurs commande
+ *
+ * @package App\EventSubscriber
+ */
 class RequireVerifiedEmailSubscriber implements EventSubscriberInterface
 {
     private const PROTECTED_ROUTES = ['checkout_index'];

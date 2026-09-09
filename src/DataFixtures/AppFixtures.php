@@ -90,6 +90,23 @@ class AppFixtures extends Fixture
             $categories[$name] = $category;
         }
 
+        $subCategories = [
+            'T-shirts' => ['Manches courtes', 'Manches longues', 'Sans manches'],
+            'Vestes' => ['Légéres', 'Matelassées'],
+            'Chaussures' => ['Sneakers', 'Bottines']
+        ];
+
+        foreach ($subCategories as $parentName => $children) {
+            foreach ($children as $childName) {
+                $child = new Category();
+                $child->setName($childName);
+                $child->setSlug($this->slugify($parentName . '-' . $childName));
+                $child->setParent($categories[$parentName]);
+                $manager->persist($child);
+                $categories[$parentName . ' > ' . $childName] = $child;
+            }
+        }
+
         return $categories;
     }
 
@@ -160,7 +177,7 @@ class AppFixtures extends Fixture
             ],
             [
                 'name' => 'T-shirt Manches Longues',
-                'category' => 'T-shirts',
+                'category' => 'T-shirts > Manches longues',
                 'price' => '32.90',
                 'description' => 'Parfait pour les saisons fraîches.'
             ],
@@ -172,7 +189,7 @@ class AppFixtures extends Fixture
             ],
             [
                 'name' => 'Veste Légère',
-                'category' => 'Vestes',
+                'category' => 'Vestes > Légéres',
                 'price' => '89.00',
                 'description' => 'Coupe-vent déperlant.'
             ],
@@ -184,7 +201,7 @@ class AppFixtures extends Fixture
             ],
             [
                 'name' => 'Veste Matelassée',
-                'category' => 'Vestes',
+                'category' => 'Vestes > Matelassées',
                 'price' => '99.00',
                 'description' => 'Chaude et légère, doublure polaire.'
             ],

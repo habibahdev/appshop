@@ -7,6 +7,23 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * État courant du stock d'une {@see ProductVariant}.
+ *
+ * Séparé de ProductVariant pour permettre la traçabilité complète des mouvements
+ * via {@see StockMovement}. Toute variation de {@see qty} doit impérativement passer
+ * par {@see \App\Service\StockService} - jamais un appel direct à {@see setQty()} depuis
+ * un contrôleur ou un autre service.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property int|null $qty Quantité disponible.
+ * @property int|null $alertThreshold Seuil d'alert stock faible.
+ * @property ProductVariant|null $variant Relation OneToOne unidirectionnelle.
+ * @property Collection<int, StockMovement> $stockMoevements
+ * @property-read \DateTimeImmutable|null $updatedAt
+ */
 #[ORM\Entity(repositoryClass: StockRepository::class)]
 class Stock
 {
@@ -133,6 +150,15 @@ class Stock
         return $this->qty > 0 && $this->qty <= $this->alertThreshold;
     }
 
+    /**
+     * Applique une variation à la quantité en stock.
+     *
+     * @internal Réservé à {@see \App\Service\StockService} - appeler cette
+     * méthode ailleurs viole la garantie de traçabilité des mouvements.
+     *
+     * @param integer $delta Variation positive (entrée) ou négative (sortie).
+     * @return static
+     */
     public function applyDelta(int $delta): static
     {
         $this->qty += $delta;

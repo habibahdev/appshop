@@ -2,16 +2,24 @@
 
 set -e
 
-echo "======================================"
-echo " AppShop - Initialisation"
-echo "======================================"
-
-echo "Installation des dépendances..."
+echo "Installation des dépendances Composer..."
 composer install --no-interaction
 
 echo "Attente de MySQL..."
 
-until php bin/console dbal:run-sql "SELECT 1" >/dev/null 2>&1
+until php -r '
+try {
+    $pdo = new PDO(
+        "mysql:host=database;port=3306;dbname=appshop",
+        "appshop",
+        "appshop"
+    );
+    $pdo->query("SELECT 1");
+    exit(0);
+} catch (Throwable $e) {
+    exit(1);
+}
+'
 do
     sleep 2
 done
@@ -19,18 +27,24 @@ done
 echo "MySQL est disponible."
 
 echo "Exécution des migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction
 
-echo "Vérification des fixtures..."
+php bin/console doctrine:migrations:migrate --no-interaction
 
 if [ ! -f var/.fixtures_loaded ]; then
     echo "Chargement des fixtures..."
+
     php bin/console doctrine:fixtures:load --no-interaction
+
     touch var/.fixtures_loaded
+
     echo "Fixtures chargées."
 else
     echo "Fixtures déjà chargées."
 fi
+
+echo "Compilation des assets..."
+
+php bin/console asset-map:compile
 
 echo "Démarrage de Symfony..."
 

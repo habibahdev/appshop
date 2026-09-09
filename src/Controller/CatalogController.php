@@ -24,6 +24,7 @@ final class CatalogController extends AbstractController
         $page = $request->query->getInt('page', 1);
 
         $result = $productRepository->findByFiltersPaginated($categoryId, $search, $sort, $page);
+        $selectCategory = $categoryId ? $categoryRepository->find($categoryId) : null;
 
         return $this->render('catalog/index.html.twig', [
             'products' => $result['items'],
@@ -33,7 +34,8 @@ final class CatalogController extends AbstractController
             'categories' => $categoryRepository->findBy(['isActive' => true, 'parent' => null]),
             'currentCategory' => $categoryId,
             'currentSort' => $sort,
-            'search' => $search
+            'search' => $search,
+            'selectCategory' => $selectCategory
         ]);
     }
 

@@ -7,6 +7,23 @@ use App\Repository\ReviewRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Avis client sur un {@see Product}.
+ *
+ * Contrainte d'unicité combinée (product_id, user_id): un seul avis
+ * par utilisateur et par produit.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property Product|null $product
+ * @property User|null $user
+ * @property int|null $rating Note de 1 à 5.
+ * @property string|null $comment
+ * @property ReviewStatus|null $status Modération : en attente / approuvé / rejeté.
+ * @property bool|null $verifiedPurchase Calculé à la création selon un achat réel.
+ * @property-read \DateTimeImmutable|null $createdAt
+ */
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 #[ORM\UniqueConstraint(columns: ['product_id', 'user_id'])]
 class Review
@@ -133,6 +150,10 @@ class Review
         return $this;
     }
 
+    /**
+     * @return boolean True si {@see $status} vaut {@see ReviewStatus::APPROVED}
+     * seul état où l'avis est visible publiquement.
+     */
     public function isApproved(): bool
     {
         return $this->status === ReviewStatus::APPROVED;
