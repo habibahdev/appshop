@@ -2,6 +2,11 @@
 
 namespace App\Enum;
 
+/**
+ * Nature d'un {@see \App\Entity\StockMovement}.
+ *
+ * @package App\Enum
+ */
 enum StockMovementType: string
 {
     case ENTRY = 'entree';

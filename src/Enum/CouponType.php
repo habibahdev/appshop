@@ -2,6 +2,11 @@
 
 namespace App\Enum;
 
+/**
+ * Nature du calcul de réduction d'un {@see \Ap\Entity\Coupon}.
+ *
+ * @package App\Enum
+ */
 enum CouponType: string
 {
     case PERCENTAGE = 'percentage';

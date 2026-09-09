@@ -7,6 +7,17 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Type d'attribut de variante (ex: "Couleur", "Taille").
+ * Design EAV (Entity-Attribute-Value) : permet d'ajouter de nouveaux types
+ * d'attributs sans migration de schéma.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id Identifiant.
+ * @property string|null $name Nom de l'attribut, unique.
+ * @property Collection<int, ProductAttributeValue> $productAttributeValues
+ */
 #[ORM\Entity(repositoryClass: ProductAttributeRepository::class)]
 class ProductAttribute
 {

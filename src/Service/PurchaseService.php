@@ -9,6 +9,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 
+/**
+ * Orchestrateur de la création de commande à partir du panier - point
+ * d'entrée principal du tunnel d'achat.
+ *
+ * @package App\Service
+ */
 class PurchaseService
 {
     public function __construct(
@@ -21,6 +27,20 @@ class PurchaseService
     ) {
     }
 
+    /**
+     * Transforme le panier courant en commande persistée.
+     *
+     * Vérifie le coupon actif, décrémente le stock via
+     * {@see \App\Service\StockService::reserveForSale()} pour chaque ligne
+     * (réservation à la création de la commande, pas au paiement confirmé),
+     * puis vide le panier.
+     *
+     * @param User $user Client passant la commande.
+     * @param string $delivery Adresse de livraison (texte libre ou généré via
+     * {@see \App\Entity\Address::toDeliveryString()}).
+     * @return Purchase La commande créée, à l'état {@see PurchaseStatus::PENDING}.
+     * @throws \RuntimeException Si le panier est vide ou si le stock est insuffisant pour au moins une ligne.
+     */
     public function createFromCart(User $user, string $delivery): Purchase
     {
         if ($this->cartService->isEmpty()) {
@@ -78,6 +98,17 @@ class PurchaseService
         return $purchase;
     }
 
+    /**
+     * Marque une commande comme payée suite à confirmation Stripe.
+     *
+     * Applique la transition `payer` du workflow `purchase_status`.
+     * Doit être appelée uniquement depuis {@see \App\MessageHandler\ProcessStripeWebhookHandler}
+     * (confirmation par webhook serveur-à-serveur), jamais depuis un contrôleur HTTP synchrone
+     *
+     * @param Purchase $purchase Commande à marquer comme payée.
+     * @param string $paymentIntentId Identifiant du PaymentIntent Stripe
+     * @return void
+     */
     public function markAsPaid(Purchase $purchase, string $paymentIntentId): void
     {
         $purchase->setStripe($paymentIntentId);

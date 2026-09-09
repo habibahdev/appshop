@@ -9,6 +9,22 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Code de réduction applicable au panier.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property string|null $code Normalisé en majuscules par {@see setCode()}.
+ * @property CouponType|null $type Pourcentage ou montant fixe.
+ * @property string|null $value Valeur de la réduction (decimal).
+ * @property string|null $minAmount Montant minimum du panier.
+ * @property int|null $usageLimit Nombre d'utilisations maximum, null = illimité.
+ * @property int|null $usageCount COmpteur d'utilisations courant.
+ * @property \DateTimeImmutable|null $expiresAt
+ * @property bool|null $isActive
+ * @property Collection<int, Purchase> $purchases
+ */
 #[ORM\Entity(repositoryClass: CouponRepository::class)]
 class Coupon
 {
@@ -30,7 +46,7 @@ class Coupon
     private ?string $minAmount = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $usageLimit = 0;
+    private ?int $usageLimit = null;
 
     #[ORM\Column]
     private ?int $usageCount = 0;
@@ -163,6 +179,9 @@ class Coupon
         return $this->expiresAt !== null && $this->expiresAt < new \DateTimeImmutable();
     }
 
+    /**
+     * @return boolean True s {@see $usageCount} a atteint {@see $usageLimit}.
+     */
     public function isUsageLimitReached(): bool
     {
         return $this->usageLimit !== null && $this->usageCount >= $this->usageLimit;

@@ -7,6 +7,19 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Catégorie de produits, structurée en arborescence à deux niveaus
+ * (catégorie racine / sous-catégorie) via une relation auto-référencée.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id Identifiant.
+ * @property string|null $name Nom de la catégorie.
+ * @property string|null $slug URL de la catégorie.
+ * @property self|null $parent Catégorie parente, null si racine.
+ * @property Collection<int, self> $children Sous-catégories directes.
+ * @property bool|null $isActive Visible dans le catalogue public.
+ */
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
 {

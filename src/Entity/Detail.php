@@ -6,6 +6,21 @@ use App\Repository\DetailRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Ligne de commande - snapshot figé des informations produit au moment
+ * de l'achat, indépendant de toute modification ultérieurs du catalogue.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property Purchase|null $purchase
+ * @property string|null $productName Copie figée, indépendante de {@see Product::$name}.
+ * @property string|null $variantLabel Copie figée de {@see ProductVariant::getLabel()}.
+ * @property string|null $productPrice Copie figée du prix au moment de l'achat.
+ * @property int|null $qty
+ * @property ProductVariant|null $variant Référence vivante, nullable (onDelete: SET NULL) - à usage de
+ * navigation uniquement, jamais pour l'affichage du prix ou du nom
+ */
 #[ORM\Entity(repositoryClass: DetailRepository::class)]
 class Detail
 {

@@ -5,6 +5,21 @@ namespace App\Entity;
 use App\Repository\AddressRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Adresse de livraison enregistrée dans le carnet d'un {@see User}.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property User|null $user
+ * @property string|null $label Nom libre donné par l'utilisateur (ex. "Maison").
+ * @property string|null $fullname
+ * @property string|null $street
+ * @property string|null $postalCode
+ * @property string|null $city
+ * @property string|null $country
+ * @property bool|null $isDefault Une seule adresse par défaut à la fois.
+ */
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 class Address
 {
@@ -139,6 +154,12 @@ class Address
         return $this;
     }
 
+    /**
+     * Formate l'adresse en texte multi-lignes pour pré-remplir le champ
+     * {@see Purchase::$delivery} au checkout.
+     *
+     * @return string Adresse formatée sur plusieurs lignes.
+     */
     public function toDeliveryString(): string
     {
         return sprintf(

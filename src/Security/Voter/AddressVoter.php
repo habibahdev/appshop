@@ -8,6 +8,10 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
+ * Contrôle d'accès aux adresses de livraison : seul le propriétaire
+ * peut éditer/supprimer une {@see Address}.
+ *
+ * @package App\Security\Voter
  * @extends Voter<string, Address>
  */
 class AddressVoter extends Voter

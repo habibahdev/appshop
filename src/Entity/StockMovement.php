@@ -6,6 +6,20 @@ use App\Enum\StockMovementType;
 use App\Repository\StockMovementRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Ligne d'historique d'une variation de {@see Stock} - entrés, sortie...
+ * Constitue le journal d'audit du stock.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property Stock|null $stock
+ * @property StockMovementType|null $type Nature du mouvement.
+ * @property int|null $qty Toujours positive; le sens est porté par {@see $type}.
+ * @property string|null $reason Motif.
+ * @property Purchase|null $purchase Commande à l'origine du mouvement, si applicable.
+ * @property-read \DateTimeImmutable|null $createdAt
+ */
 #[ORM\Entity(repositoryClass: StockMovementRepository::class)]
 class StockMovement
 {
@@ -115,6 +129,12 @@ class StockMovement
         return $this;
     }
 
+    /**
+     * Quantité signée selon le type de mouvement.
+     *
+     * @return integer Négatif pour {@see StockMovementType::OUTING}
+     * et {@see StockMovementType::SALE}, positif sinon
+     */
     public function getSignedQty(): int
     {
         return in_array($this->type, [StockMovementType::OUTING, StockMovementType::SALE], true)

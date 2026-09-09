@@ -2,6 +2,12 @@
 
 namespace App\Enum;
 
+/**
+ * État du cycle de vie d'une {@see \App\Entity\Purchase}, piloté par le
+ * composant Workflow Symfony `purchase_status`.
+ *
+ * @package App\Enum
+ */
 enum PurchaseStatus: string
 {
     case PENDING = 'en_attente_paiement';

@@ -2,6 +2,11 @@
 
 namespace App\Enum;
 
+/**
+ * État de modération d'un {@see \App\Entity\Review}.
+ *
+ * @package App\Enum
+ */
 enum ReviewStatus: string
 {
     case PENDING = 'en_attente';

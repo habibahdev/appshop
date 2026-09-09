@@ -5,6 +5,20 @@ namespace App\Entity;
 use App\Repository\InvoiceRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Facture PDF géérée après confirmation de paiement d'une {@see Purchase}.
+ *
+ * Le fichier PDF est stocké sur le système de fichiers (paramètre `invoice_storage_path`);
+ * seuls le chemin et les métadonnées sont en base.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id
+ * @property Purchase|null $purchase Relation OneToOne.
+ * @property string|null $numer Numéro unique.
+ * @property string|null $filename Nom du fichier PDF sur disque.
+ * @property-read \DateTimeImmutable|null $issuedAt
+ */
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
 class Invoice
 {

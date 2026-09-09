@@ -10,6 +10,14 @@ use App\Enum\StockMovementType;
 use App\Repository\StockRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Point de passage unique pour toute variation de {@see Stock::$qty}.
+ *
+ * Garantit qu'un {@see StockMovement} est créé à chaque changement,
+ * assurant la traçabilité complète des mouvements de stock.
+ *
+ * @package App\Service
+ */
 class StockService
 {
     public function __construct(
@@ -18,6 +26,13 @@ class StockService
     ) {
     }
 
+    /**
+     * Crée l'enregistrement de stock pour une variante qui n'en possède pas encore.
+     *
+     * @param ProductVariant $variant Variante à initialiser.
+     * @param integer $initialQty Quantité de départ (crée un mouvement ENTRY si > 0).
+     * @return Stock
+     */
     public function initialize(ProductVariant $variant, int $initialQty = 0): Stock
     {
         $stock = new Stock();
@@ -31,16 +46,38 @@ class StockService
         return $stock;
     }
 
+    /**
+     * Retourne le stock associé, null si non initialisé.
+     *
+     * @param ProductVariant $variant Variante dont on cherche le stock.
+     * @return Stock|null
+     */
     public function getStockForVariant(ProductVariant $variant): ?Stock
     {
         return $this->stockRepository->findOneByVariant($variant);
     }
 
+    /**
+     * Enregistre une réception de marchandise (mouvement ENTRY).
+     *
+     * @param Stock $stock Stock à réapprovisionner.
+     * @param integer $qty Quantité reçue.
+     * @param string|null $reason Motifi optionnel.
+     * @return void
+     */
     public function restock(Stock $stock, int $qty, ?string $reason = null): void
     {
         $this->registerMovement($stock, StockMovementType::ENTRY, $qty, $reason);
     }
 
+    /**
+     * Décrémente le stock suite à une vente (mouvement SALE).
+     *
+     * @param Stock $stock Stock à décrémenter.
+     * @param integer $qty Quantité vendue.
+     * @param Purchase $purchase Commande à l'origine de la vente.
+     * @return void
+     */
     public function reserveForSale(Stock $stock, int $qty, Purchase $purchase): void
     {
         if ($stock->getQty() < $qty) {
@@ -55,11 +92,28 @@ class StockService
         $this->registerMovement($stock, StockMovementType::SALE, $qty, null, $purchase);
     }
 
+    /**
+     * Réintègre du stock suite à un retour client (mouvement BACK).
+     *
+     * @param Stock $stock Stock à créditer.
+     * @param integer $qty Quantité retournée.
+     * @param Purchase $purchase Commande d'origine du retour.
+     * @param string|null $reason Motif optionnel.
+     * @return void
+     */
     public function returnStock(Stock $stock, int $qty, Purchase $purchase, ?string $reason = null): void
     {
         $this->registerMovement($stock, StockMovementType::BACK, $qty, $reason, $purchase);
     }
 
+    /**
+     * Correction manuelle du stock (inventaire, casse, erreur de saisie).
+     *
+     * @param Stock $stock Stock à ajuster.
+     * @param integer $delta Variation, positive (ENTRY) ou négative (OUTING)?
+     * @param string $reason Motifi obligatoire (traçabilité de la correction).
+     * @return void
+     */
     public function adjust(Stock $stock, int $delta, string $reason): void
     {
         $type = $delta >= 0 ? StockMovementType::ENTRY : StockMovementType::OUTING;

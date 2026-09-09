@@ -2,12 +2,30 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
+/**
+ * Fiche produit éditoriale. Ne porte ni prix ni stock - ces informations commerciales
+ * vivent sur {@see ProductVariant}, la déclinaison réellement vendable et ajoutée au panier.
+ *
+ * @package App\Entity
+ *
+ * @property-read int|null $id Identifiant.
+ * @property string|null $name Nom du produit.
+ * @property string|null $slug URL du produit.
+ * @property string|null $description Description du produit.
+ * @property bool|null $isActive Visible dans le catalogue public.
+ * @property-read \DateTimeImmutable|null $createdAt Initialisé au constructeur.
+ * @property Category|null $category Catégorie du produit associée.
+ * @property Collection<int, ProductImage> $images Images du produit.
+ * @property Collection<int, ProductVariant> $variants
+ * @property Collection<int, Review> $reviews
+ *
+ */
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
@@ -228,6 +246,12 @@ class Product
         return $this;
     }
 
+    /**
+     * Prix le plus bas parmi les variantes actives du produit.
+     * Utilisé pour l'affichage "à partir de X€" en liste catalogue.
+     *
+     * @return string|null Prix minimum au format decimal, ou null si aucune variante n'est active.
+     */
     public function getMinPrice(): ?string
     {
         $prices = array_map(
