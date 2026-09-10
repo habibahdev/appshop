@@ -8,6 +8,9 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Accès aux données des adresses de livraison.
+ *
+ * @package App\Repository
  * @extends ServiceEntityRepository<Address>
  */
 class AddressRepository extends ServiceEntityRepository
@@ -18,7 +21,8 @@ class AddressRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Address[]
+     * @param User $user Utilisateur concerné.
+     * @return Address[] Adresses du carnet, adresse par défaut en tête.
      */
     public function findByUser(User $user): array
     {
@@ -31,29 +35,4 @@ class AddressRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
-
-    //    /**
-    //     * @return Address[] Returns an array of Address objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Address
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

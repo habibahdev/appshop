@@ -9,8 +9,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Panier d'achat : consultation, ajout, modification et suppression de lignes.
+ *
+ * @package App\Controller
+ */
 final class CartController extends AbstractController
 {
+    /**
+     * @param CartService $cartService
+     * @param StockRepository $stockRepository
+     * @return Response Vue du panier
+     */
     #[Route('/cart', name: 'app_cart', methods: ['GET'])]
     public function index(CartService $cartService, StockRepository $stockRepository): Response
     {
@@ -37,6 +47,11 @@ final class CartController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param CartService $cartService
+     * @return Response Redirection vers le panier
+     */
     #[Route('/cart/add', name: 'app_cart_add', methods: ['POST'])]
     public function add(Request $request, CartService $cartService): Response
     {
@@ -53,6 +68,12 @@ final class CartController extends AbstractController
         return $this->redirectToRoute('app_cart');
     }
 
+    /**
+     * @param int $variantId Identifiant de la variante.
+     * @param Request $request
+     * @param CartService $cartService
+     * @return Response
+     */
     #[Route('/cart/update/{variantId}', name: 'app_cart_update', methods: ['POST'])]
     public function update(int $variantId, Request $request, CartService $cartService): Response
     {
@@ -60,6 +81,11 @@ final class CartController extends AbstractController
         return $this->redirectToRoute('app_cart');
     }
 
+    /**
+     * @param int $variantId Identifiant de la variante.
+     * @param CartService $cartService
+     * @return Response
+     */
     #[Route('/cart/delete/{variantId}', name: 'app_cart_remove', methods: ['POST'])]
     public function remove(int $variantId, CartService $cartService): Response
     {

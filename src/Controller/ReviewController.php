@@ -30,7 +30,7 @@ final class ReviewController extends AbstractController
                 (int) $request->request->get('rating', 5),
                 trim((string) $request->request->get('comment', ''))
             );
-            $this->addFlash('success', 'Merci, ton avis a été soumis et sera publiè après modération');
+            $this->addFlash('success', 'Merci, ton avis a été soumis');
         } catch (\InvalidArgumentException $e) {
             $this->addFlash('error', $e->getMessage());
         }

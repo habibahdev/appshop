@@ -8,6 +8,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Page d'accueil : mise en avant de nouveautés et navigation par catégorie.
+ *
+ * @package App\Controller
+ */
 final class HomeController extends AbstractController
 {
     #[Route('/', name: 'app_home')]

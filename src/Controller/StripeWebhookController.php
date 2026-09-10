@@ -12,12 +12,27 @@ use Stripe\Exception\SignatureVerificationException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * Réception des webhooks Stripe - point d'entrée serveur-à-serveur qui
+ * déclenche le traitement asynchrone du paiement confirmé.
+ *
+ * @package App\Controller
+ */
 final class StripeWebhookController extends AbstractController
 {
     public function __construct(private readonly string $stripeWebhookSecret)
     {
     }
 
+    /**
+     * Vérifie la signature Stripe puis dispatche {@see \App\Message\ProcessStripeWebhook}
+     * pour traitement asynchrone.
+     *
+     * @param Request $request
+     * @param StripeService $stripeService
+     * @param MessageBusInterface $bus
+     * @return Response
+     */
     #[Route('/stripe/webhook', name: 'app_stripe_webhook', methods: ['POST'])]
     public function handle(
         Request $request,

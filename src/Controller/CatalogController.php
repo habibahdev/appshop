@@ -10,8 +10,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Catalogue produits : liste paginée/filtrée et fiche produit détaillée.
+ *
+ * @package App\Controller
+ */
 final class CatalogController extends AbstractController
 {
+    /**
+     * Liste paginée du catalogue, avec filtres catégorie/recherche/tri.
+     *
+     * @param Request $request
+     * @param ProductRepository $productRepository
+     * @param CategoryRepository $categoryRepository
+     * @return Response
+     */
     #[Route('/catalog', name: 'app_catalog')]
     public function index(
         Request $request,
@@ -39,6 +52,10 @@ final class CatalogController extends AbstractController
         ]);
     }
 
+    /**
+     * Fiche produit détaillée, avec matrice couleur/taille des variantes
+     * et disponibilité en stock résolue pour chacune.
+     */
     #[Route('/product/{slug}', name: 'app_product_show')]
     public function show(string $slug, ProductRepository $productRepository, StockRepository $stockRepository): Response
     {

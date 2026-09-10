@@ -11,11 +11,31 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * Tunnel de paiement : formulaire de livraison, redirection Stripe
+ * Checkout, pages de retour succès/annulation.
+ *
+ * @package App\Controller
+ */
 final class CheckoutController extends AbstractController
 {
+    /**
+     * Formulaire de livraison puis création de la commande et
+     * redirection vers Stripe
+     *
+     * @param Request $request
+     * @param PurchaseService $purchaseService
+     * @param StripeService $stripeService
+     * @return Response
+     * @throws \RuntimeException Propagée en flash si le panier est vide
+     * ou le stock insuffisant (voir {@see PurchaseService::createFromCart()})
+     */
     #[Route('/checkout', name: 'app_checkout', methods: ['GET', 'POST'])]
-    public function index(Request $request, PurchaseService $purchaseService, StripeService $stripeService): Response
-    {
+    public function index(
+        Request $request,
+        PurchaseService $purchaseService,
+        StripeService $stripeService
+    ): Response {
         if ($request->isMethod('POST')) {
             $address = $request->request->get('address');
 

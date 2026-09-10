@@ -8,6 +8,9 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Accès aux données des commandes.
+ *
+ * @package App\Repository
  * @extends ServiceEntityRepository<Purchase>
  */
 class PurchaseRepository extends ServiceEntityRepository
@@ -17,6 +20,13 @@ class PurchaseRepository extends ServiceEntityRepository
         parent::__construct($registry, Purchase::class);
     }
 
+    /**
+     * Chiffre d'affaires cumulé depuis une date donnée
+     * (commandes non annulées uniquement).
+     *
+     * @param \DateTimeImmutable $date
+     * @return numeric-string
+     */
     public function getRevenueSince(\DateTimeImmutable $date): string
     {
         $result = $this->createQueryBuilder('p')
@@ -29,9 +39,19 @@ class PurchaseRepository extends ServiceEntityRepository
             ->getSingleScalarResult()
         ;
 
+        if (!is_numeric($result)) {
+            throw new \UnexpectedValueException('Le chiffre d’affaires retourné n’est pas numérique.');
+        }
+
         return (string) $result;
     }
 
+    /**
+     * Nombre de commandes passées depuis une date donnée.
+     *
+     * @param \DateTimeImmutable $date
+     * @return integer
+     */
     public function countSince(\DateTimeImmutable $date): int
     {
         return (int) $this->createQueryBuilder('p')
@@ -42,29 +62,4 @@ class PurchaseRepository extends ServiceEntityRepository
             ->getSingleScalarResult()
         ;
     }
-
-    //    /**
-    //     * @return Purchase[] Returns an array of Purchase objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Purchase
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

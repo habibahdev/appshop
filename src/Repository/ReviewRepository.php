@@ -10,6 +10,9 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Accès aux données des avis produit.
+ *
+ * @package App\Repository
  * @extends ServiceEntityRepository<Review>
  */
 class ReviewRepository extends ServiceEntityRepository
@@ -19,6 +22,10 @@ class ReviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Review::class);
     }
 
+    /**
+     * @param Product $product Produit concerné.
+     * @return float|null Note moyenne des avis approuvés, null si aucun avis.
+     */
     public function getAverageRating(Product $product): ?float
     {
         $result = $this->createQueryBuilder('r')
@@ -35,7 +42,8 @@ class ReviewRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Review[]
+     * @param Product $product Produit concerné.
+     * @return Review[] Avis approouvés pour ce produit, triés du plus récent au plus ancien.
      */
     public function findApprovedForProduct(Product $product): array
     {
@@ -50,6 +58,11 @@ class ReviewRepository extends ServiceEntityRepository
         ;
     }
 
+    /**
+     * @param Product $product Produit concerné.
+     * @param User $user Utilisateur concerné.
+     * @return boolean True si cet utilisateur a déjà un avis sur ce produit.
+     */
     public function hasUserReviewed(Product $product, User $user): bool
     {
         return (bool) $this->count([
@@ -57,29 +70,4 @@ class ReviewRepository extends ServiceEntityRepository
             'user' => $user
         ]);
     }
-
-    //    /**
-    //     * @return Review[] Returns an array of Review objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Review
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }
