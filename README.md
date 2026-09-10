@@ -34,28 +34,28 @@ docker compose -f dokcer-compose.dev.yaml down
 docker compose -f docker-compose.dev.yaml down -v
 ```
 
-### Commande Symfony
+## Commande Symfony
 Toutes les commandes `php bin/console` doivent s'exécuter **à l'intérieur** du conteneur `app` :
 ```bash
 docker compose -f docker-compose.dev.yaml exec app php bin/console <commande>
 ```
 
-### Installer un package
+## Installer un package
 ```bash
 docker compose -f docker-compose.dev.yaml exec app composer require <package>
 ```
 
-### Ouvrir un shell dans le conteneur
+## Ouvrir un shell dans le conteneur
 ```bash
 docker compose -f docker-compose.dev.yaml exec app php sh
 ```
 
-### Accéder à la base de données
+## Accéder à la base de données
 ```bash
 docker compose -f docker-compose.dev.yaml exec database mysql -uappshop -pappshop appshop
 ```
 
-### Voir les logs
+## Voir les logs
 ```bash
 # Logs du conteneur app en direct
 docker compose -f docker-compose.dev.yaml logs -f app
@@ -64,7 +64,7 @@ docker compose -f docker-compose.dev.yaml logs -f app
 docker compose -f docker-compose.dev.yaml logs -f database
 ```
 
-### Rebuild l'image après modification du Dockerfile
+## Rebuild l'image après modification du Dockerfile
 Si modification de `Dockerfile.dev` :
 ```bash
 docker compose -f docker-compose.dev.yaml up -d --build
