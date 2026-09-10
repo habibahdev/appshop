@@ -10,6 +10,10 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 /**
+ * Accès aux données des produits, avec filtrage, pagination et mise en
+ * cache du catalogue
+ *
+ * @package App\Repository
  * @extends ServiceEntityRepository<Product>
  */
 class ProductRepository extends ServiceEntityRepository
@@ -82,6 +86,17 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * Liste paginée des produits actifs correspondant aux filtres.
+     *
+     * Les résultats sont mis en cache (pool `cache.catalog`, tag-aware)
+     * sauf en cas de recherche libre ($search non vide), où la variété
+     * des clés possibles rendrait le cache inefficace. Le cache est
+     * invalidé automatiquement par {@see \App\EnventListener\ProductCacheInvalidationListener}.
+     *
+     * @param int|null $categoryId Filtre par catégorie, null = troutes.
+     * @param string|null $search Recherche libre sur le nom du produit.
+     * @param string $sort Tri : `price_asc`, `price_desc`, `name`, ou défaut (plus récents).
+     * @param int $page Numéro de page, 1-indexé.
      * @return array{items: Product[], total: int, page: int, pages: int}
      */
     public function findByFiltersPaginated(
@@ -154,29 +169,4 @@ class ProductRepository extends ServiceEntityRepository
             'pages' => (int) max(1, ceil($total / self::PER_PAGE))
         ];
     }
-
-//    /**
-//     * @return Product[] Returns an array of Product objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Product
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }
