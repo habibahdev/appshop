@@ -8,7 +8,7 @@ on:
 jobs:
   quality:
     name: Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       APP_ENV: test
 
@@ -49,9 +49,9 @@ jobs:
       - name: PHPStan
         run: vendor/bin/phpstan analyse
 
-  test:
-    name: PHPUnit
-    runs-on: ubuntu-latest
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-24.04
     needs: quality
     env:
       APP_ENV: test
@@ -64,7 +64,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, zip, pdo
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, zip, pdo, bcmath
           coverage: none
           tools: composer:v2
 
@@ -78,6 +78,72 @@ jobs:
       - name: Dependencies
         run: composer install --no-progress --prefer-dist
 
-      - name: PHPUnit - unitaire
-        run: vendor/bin/phpunit
+      - name: PHPUnit - unit
+        run: vendor/bin/phpunit -c phpunit.unit.dist.xml
+
+  functional-test:
+    name: Functional Test
+    runs-on: ubuntu-24.04
+    needs: unit-test
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: appshop_test
+          MYSQL_USER: appshop
+          MYSQL_PASSWORD: appshop
+          MYSQL_ROOT_PASSWORD: appshop
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      APP_ENV: test
+      DATABASE_URL: "mysql://appshop:appshop@127.0.0.1:3306/appshop?serverVersion=8.4.0&charset=utf8mb4"
+      STRIPE_SECRET_KEY: sk_test_dummy
+      STRIPE_WEBHOOK_SECRET: whsec_dummy
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, zip, pdo, bcmath
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Wait MySQL
+        run: |
+          for i in {1..30}; do
+            mysqladmin ping -h127.0.0.1 -uroot -pappshop --silent && break
+            sleep 2
+          done
+
+      - name: Schema
+        run: |
+          php bin/console doctrine:schema:create --env=test
+
+      - name: Tailwind
+        run: php bin/console tailwind:build --env=test
+
+      - name: PHPUnit - functional
+        run: vendor/bin/phpunit -c phpunit.functional.dist.xml
 

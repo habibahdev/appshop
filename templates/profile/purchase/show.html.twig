@@ -13,12 +13,12 @@
             <p class="text-sm text-stone-400 mt-1">{{ purchase.createdAt|date('d/m/Y à H:i') }}</p>
         </div>
         <span class="text-xs uppercase tracking-wide px-3 py-1.5 border border-stone-200 text-stone-600">
-            {{ purchase.status|replace({'_': ' '}) }}
+            {{ purchase.status.value|replace({'_': ' '}) }}
         </span>
     </div>
 
     <div class="divide-y divide-stone-200 mb-10">
-        {% for item in purchase.items %}
+        {% for item in purchase.details %}
         <div class="flex items-center justify-between py-4">
             <div>
                 <p class="text-sm text-stone-900">{{ item.productName }}</p>
