@@ -8,7 +8,7 @@ on:
 jobs:
   quality:
     name: Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       APP_ENV: test
 
@@ -51,7 +51,7 @@ jobs:
 
   unit-test:
     name: Unit Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: quality
     env:
       APP_ENV: test
@@ -83,7 +83,7 @@ jobs:
 
   functional-test:
     name: Functional Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: unit-test
 
     services:
@@ -111,23 +111,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24.21.0'
-          cache: npm
-
-      - name: Check Node and npm
-        run: |
-          node -v
-          npm -v
-
-      - name: Install Node Dependencies
-        run: npm ci
-
-      - name: Build assets
-        run: npm run build
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -157,6 +140,9 @@ jobs:
       - name: Schema
         run: |
           php bin/console doctrine:schema:create --env=test
+
+      - name: Tailwind
+        run: php bin/console tailwind:build --env=test
 
       - name: PHPUnit - functional
         run: vendor/bin/phpunit -c phpunit.functional.dist.xml
