@@ -90,7 +90,7 @@ jobs:
       mysql:
         image: mysql:8.4
         env:
-          MYSQL_DATABASE: appshop_test
+          MYSQL_DATABASE: appshop
           MYSQL_USER: appshop
           MYSQL_PASSWORD: appshop
           MYSQL_ROOT_PASSWORD: appshop
@@ -104,7 +104,7 @@ jobs:
 
     env:
       APP_ENV: test
-      DATABASE_URL: "mysql://appshop:appshop@127.0.0.1:3306/appshop_test?serverVersion=8.4.0&charset=utf8mb4"
+      DATABASE_URL: "mysql://appshop:appshop@127.0.0.1:3306/appshop?serverVersion=8.4.0&charset=utf8mb4"
       STRIPE_SECRET_KEY: sk_test_dummy
       STRIPE_WEBHOOK_SECRET: whsec_dummy
 
