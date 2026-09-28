@@ -90,7 +90,7 @@ jobs:
       mysql:
         image: mysql:8.4
         env:
-          MYSQL_DATABASE: appshop
+          MYSQL_DATABASE: appshop_test
           MYSQL_USER: appshop
           MYSQL_PASSWORD: appshop
           MYSQL_ROOT_PASSWORD: appshop
