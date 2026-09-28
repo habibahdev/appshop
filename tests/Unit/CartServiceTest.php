@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests;
+namespace App\Tests\Unit;
 
 use App\Entity\ProductVariant;
 use App\Entity\Stock;
