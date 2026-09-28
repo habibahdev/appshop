@@ -112,6 +112,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.21.0'
+          cache: npm
+
+      - name: Check Node and npm
+        run: |
+          node -v
+          npm -v
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -133,7 +150,7 @@ jobs:
       - name: Wait MySQL
         run: |
           for i in {1..30}; do
-            mysqladmin ping -h127.0.0.1 -uroot -proot --silent && break
+            mysqladmin ping -h127.0.0.1 -uroot -pappshop --silent && break
             sleep 2
           done
 
