@@ -79,7 +79,7 @@ jobs:
         run: composer install --no-progress --prefer-dist
 
       - name: PHPUnit - unit
-        run: vendor/bin/phpunit
+        run: vendor/bin/phpunit -c phpunit.unit.dist.xml
 
   functional-test:
     name: Functional Test
@@ -142,5 +142,5 @@ jobs:
           php bin/console doctrine:schema:create --env=test
 
       - name: PHPUnit - functional
-        run: vendor/bin/phpunit tests/Functional
+        run: vendor/bin/phpunit -c phpunit.functional.dist.xml
 
